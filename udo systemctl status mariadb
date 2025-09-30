@@ -1,0 +1,23 @@
+[0;1;32m●[0m mariadb.service - MariaDB 10.11 database server
+     Loaded: loaded (]8;;file://localhost.localdomain/usr/lib/systemd/system/mariadb.service\/usr/lib/systemd/system/mariadb.service]8;;\; [0;1;32menabled[0m; preset: [0;1;38:5:185mdisabled[0m)
+     Active: [0;1;32mactive (running)[0m since Sun 2025-09-28 16:43:19 -05; 1h 31min ago
+ Invocation: a3a7f66c6b3b40ddbc50a52347900872
+       Docs: ]8;;man:mariadbd(8)\man:mariadbd(8)]8;;\
+             ]8;;https://mariadb.com/kb/en/library/systemd/\https://mariadb.com/kb/en/library/systemd/]8;;\
+    Process: 1700 ExecStartPre=/usr/libexec/mariadb-check-socket (code=exited, status=0/SUCCESS)
+    Process: 1734 ExecStartPre=/usr/libexec/mariadb-prepare-db-dir mariadb.service (code=exited, status=0/SUCCESS)
+    Process: 1800 ExecStartPost=/usr/libexec/mariadb-check-upgrade (code=exited, status=0/SUCCESS)
+   Main PID: 1775 (mariadbd)
+     Status: "[0;1;36mTaking your SQL requests now...[0m"
+      Tasks: 9[0;38;5;245m (limit: 201371)[0m
+     Memory: 216.7M (peak: 221.3M)
+        CPU: 214ms
+     CGroup: /system.slice/mariadb.service
+             └─[0;38;5;245m1775 /usr/libexec/mariadbd --basedir=/usr[0m
+
+sep 28 16:43:19 localhost.localdomain systemd[1]: Starting mariadb.service - MariaDB 10.11 database server...
+sep 28 16:43:19 localhost.localdomain mariadb-prepare-db-dir[1734]: Database MariaDB is probably initialized in /var/lib/mysql already, nothing is done.
+sep 28 16:43:19 localhost.localdomain mariadb-prepare-db-dir[1734]: If this is not the case, make sure the /var/lib/mysql is empty before running mariadb-prepare-db-dir.
+sep 28 16:43:19 localhost.localdomain (mariadbd)[1775]: [0;1;38:5:185m[0;1;39m[0;1;38:5:185mmariadb.service: Referenced but unset environment variable evaluates to an empty string: MYSQLD_OPTS, _WSREP_NEW_CLUSTER[0m
+sep 28 16:43:19 localhost.localdomain mariadbd[1775]: 2025-09-28 16:43:19 0 [Warning] failed to retrieve the MAC address
+sep 28 16:43:19 localhost.localdomain systemd[1]: Started mariadb.service - MariaDB 10.11 database server.
