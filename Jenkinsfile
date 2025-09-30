@@ -9,16 +9,16 @@ pipeline {
     stages {
         stage('Preparar entorno') {
             steps {
-                echo 'Instalando dependencias...'
+                echo 'Instalando dependencias PHP y Composer...'
                 sh 'composer install --no-interaction --prefer-dist'
-                sh 'cp .env.example .env'
-                sh 'php artisan key:generate'
+                sh 'cp -n .env.example .env || true' // no sobreescribe si ya existe
+                sh 'php artisan key:generate || true'
             }
         }
 
         stage('Verificar código') {
             steps {
-                echo 'Corriendo análisis de código...'
+                echo 'Corriendo verificación de Laravel...'
                 sh 'php artisan --version'
             }
         }
@@ -32,7 +32,7 @@ pipeline {
 
         stage('Construir assets') {
             steps {
-                echo 'Compilando assets...'
+                echo 'Instalando dependencias Node y construyendo assets...'
                 sh 'npm install'
                 withEnv(["NODE_OPTIONS=--openssl-legacy-provider"]) {
                     sh 'npm run build'
@@ -42,9 +42,19 @@ pipeline {
 
         stage('Limpiar caché') {
             steps {
-                echo 'Limpiando caché...'
-                sh 'php artisan cache:clear'
-                sh 'php artisan config:clear'
+                echo 'Limpiando caché y configuraciones...'
+                script {
+                    // Verifica si hay conexión a la DB antes de limpiar cache
+                    def dbAvailable = sh(script: "php -r \"try { new PDO('mysql:host=${env.DB_HOST};dbname=${env.DB_DATABASE}', '${env.DB_USERNAME}', '${env.DB_PASSWORD}'); echo 'ok'; } catch (Exception \$e) { echo 'fail'; }\"", returnStdout: true).trim()
+                    if (dbAvailable == 'ok') {
+                        sh 'php artisan cache:clear'
+                        sh 'php artisan config:clear'
+                        sh 'php artisan route:clear'
+                        sh 'php artisan view:clear'
+                    } else {
+                        echo '⚠️ Base de datos no disponible, se omite limpieza de cache'
+                    }
+                }
             }
         }
 
