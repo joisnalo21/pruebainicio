@@ -29,13 +29,14 @@ pipeline {
                 sh 'vendor/bin/phpunit --configuration phpunit.xml'
             }
         }
-        
+
         stage('Construir assets') {
             steps {
-            echo 'Compilando assets...'
-            sh 'npm install'
-            withEnv(["NODE_OPTIONS=--openssl-legacy-provider"]) {
-            sh 'npm run build'
+                echo 'Compilando assets...'
+                sh 'npm install'
+                withEnv(["NODE_OPTIONS=--openssl-legacy-provider"]) {
+                    sh 'npm run build'
+                }
             }
         }
 
