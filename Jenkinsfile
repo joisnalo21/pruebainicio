@@ -22,17 +22,15 @@ pipeline {
         }
 
         stage('Cargar variables .env') {
-            steps {
-                script {
-                    sh '''
-                    echo "🔄 Cargando variables desde .env..."
-                    set -a
-                    . .env
-                    set +a
-                    '''
-                }
-            }
-        }
+    steps {
+        sh '''
+        echo "🔄 Creando .env desde .env.example..."
+        cp -n .env.example .env
+        php artisan key:generate
+        '''
+    }
+}
+
 
         stage('Preparar entorno') {
             steps {
