@@ -3,15 +3,28 @@ pipeline {
 
     environment {
         COMPOSER_HOME = "${WORKSPACE}/.composer"
-        APP_ENV = "testing"
+        APP_ENV = "local"
     }
 
     stages {
+        stage('Cargar variables .env') {
+            steps {
+                script {
+                    sh '''
+                    echo "🔄 Cargando variables desde .env..."
+                    set -a
+                    source .env || true
+                    set +a
+                    '''
+                }
+            }
+        }
+
         stage('Preparar entorno') {
             steps {
                 echo 'Instalando dependencias PHP y Composer...'
                 sh 'composer install --no-interaction --prefer-dist'
-                sh 'cp -n .env.example .env || true' // no sobreescribe si ya existe
+                sh 'cp -n .env.example .env || true'
                 sh 'php artisan key:generate || true'
             }
         }
@@ -44,7 +57,6 @@ pipeline {
             steps {
                 echo 'Limpiando caché y configuraciones...'
                 script {
-                    // Verifica si hay conexión a la DB antes de limpiar cache
                     def dbAvailable = sh(script: "php -r \"try { new PDO('mysql:host=${env.DB_HOST};dbname=${env.DB_DATABASE}', '${env.DB_USERNAME}', '${env.DB_PASSWORD}'); echo 'ok'; } catch (Exception \$e) { echo 'fail'; }\"", returnStdout: true).trim()
                     if (dbAvailable == 'ok') {
                         sh 'php artisan cache:clear'
@@ -61,7 +73,6 @@ pipeline {
         stage('Deploy (opcional)') {
             steps {
                 echo 'Aquí podrías desplegar a staging o producción'
-                // Ejemplo: sh 'rsync -avz ./ user@servidor:/ruta/app'
             }
         }
     }
