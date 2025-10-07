@@ -6,19 +6,18 @@ pipeline {
         APP_ENV = "local"
     }
 
-    stages {
-        stage('Cargar variables .env') {
-            steps {
-                script {
-                    sh '''
-                    echo "🔄 Cargando variables desde .env..."
-                    set -a
-                    source .env || true
-                    set +a
-                    '''
-                }
-            }
+    stage('Cargar variables .env') {
+    steps {
+        script {
+            sh '''
+            echo "🔄 Cargando variables desde .env..."
+            set -a
+            . .env
+            set +a
+            '''
         }
+    }
+}
 
         stage('Preparar entorno') {
             steps {
