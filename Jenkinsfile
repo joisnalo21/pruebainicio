@@ -2,35 +2,51 @@ pipeline {
     agent any
 
     environment {
-        COMPOSER_HOME = "${WORKSPACE}/.composer"
-        APP_ENV = "local"
+        // Cargar variables de .env más adelante usando sh
+        APP_ENV = 'local'
+        APP_DEBUG = 'true'
+        DB_CONNECTION = 'mysql'
+        DB_HOST = '127.0.0.1'
+        DB_PORT = '3306'
+        DB_DATABASE = 'pruebainicio'
+        DB_USERNAME = 'laravel_user'
+        DB_PASSWORD = 'admin'
     }
 
-    stage('Cargar variables .env') {
-    steps {
-        script {
-            sh '''
-            echo "🔄 Cargando variables desde .env..."
-            set -a
-            . .env
-            set +a
-            '''
+    stages {
+
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
         }
-    }
-}
+
+        stage('Cargar variables .env') {
+            steps {
+                script {
+                    sh '''
+                    echo "🔄 Cargando variables desde .env..."
+                    set -a
+                    . .env
+                    set +a
+                    '''
+                }
+            }
+        }
 
         stage('Preparar entorno') {
             steps {
                 echo 'Instalando dependencias PHP y Composer...'
-                sh 'composer install --no-interaction --prefer-dist'
-                sh 'cp -n .env.example .env || true'
-                sh 'php artisan key:generate || true'
+                sh '''
+                composer install --no-interaction --prefer-dist
+                cp -n .env.example .env
+                php artisan key:generate
+                '''
             }
         }
 
-        stage('Verificar código') {
+        stage('Verificar Laravel') {
             steps {
-                echo 'Corriendo verificación de Laravel...'
                 sh 'php artisan --version'
             }
         }
@@ -42,28 +58,44 @@ pipeline {
             }
         }
 
-        stage('Construir assets') {
+        stage('Instalar Node y compilar assets') {
             steps {
-                echo 'Instalando dependencias Node y construyendo assets...'
-                sh 'npm install'
-                withEnv(["NODE_OPTIONS=--openssl-legacy-provider"]) {
-                    sh 'npm run build'
-                }
+                sh '''
+                npm install
+                npm run build
+                '''
             }
         }
 
-        stage('Limpiar caché') {
+        stage('Iniciar MySQL con Docker') {
             steps {
-                echo 'Limpiando caché y configuraciones...'
+                echo 'Iniciando MySQL...'
+                sh '''
+                docker rm -f mysql-jenkins || true
+                docker run --name mysql-jenkins -e MYSQL_ROOT_PASSWORD=admin -e MYSQL_DATABASE=pruebainicio -e MYSQL_USER=laravel_user -e MYSQL_PASSWORD=admin -p 3306:3306 -d mysql:8
+                echo "⏳ Esperando 20s a que MySQL esté listo..."
+                sleep 20
+                '''
+            }
+        }
+
+        stage('Limpiar cache y configuraciones') {
+            steps {
                 script {
-                    def dbAvailable = sh(script: "php -r \"try { new PDO('mysql:host=${env.DB_HOST};dbname=${env.DB_DATABASE}', '${env.DB_USERNAME}', '${env.DB_PASSWORD}'); echo 'ok'; } catch (Exception \$e) { echo 'fail'; }\"", returnStdout: true).trim()
+                    def dbAvailable = sh(
+                        script: "php -r 'try { new PDO(\"mysql:host=${DB_HOST};dbname=${DB_DATABASE}\", \"${DB_USERNAME}\", \"${DB_PASSWORD}\"); echo \"ok\"; } catch (Exception \$e) { echo \"fail\"; }'",
+                        returnStdout: true
+                    ).trim()
+
                     if (dbAvailable == 'ok') {
-                        sh 'php artisan cache:clear'
-                        sh 'php artisan config:clear'
-                        sh 'php artisan route:clear'
-                        sh 'php artisan view:clear'
+                        sh '''
+                        php artisan cache:clear
+                        php artisan config:clear
+                        php artisan route:clear
+                        php artisan view:clear
+                        '''
                     } else {
-                        echo '⚠️ Base de datos no disponible, se omite limpieza de cache'
+                        echo "⚠️ Base de datos no disponible, se omite limpieza de cache"
                     }
                 }
             }
@@ -74,14 +106,12 @@ pipeline {
                 echo 'Aquí podrías desplegar a staging o producción'
             }
         }
+
     }
 
     post {
-        success {
-            echo 'Pipeline completado correctamente ✅'
-        }
-        failure {
-            echo 'Pipeline falló ❌'
+        always {
+            echo 'Pipeline completado ✅'
         }
     }
 }
