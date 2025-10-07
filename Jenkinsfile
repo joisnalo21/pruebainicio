@@ -2,14 +2,10 @@ pipeline {
     agent any
 
     environment {
-        APP_ENV = 'local'
+        APP_ENV = 'testing'
         APP_DEBUG = 'true'
-        DB_CONNECTION = 'mysql'
-        DB_HOST = '127.0.0.1'
-        DB_PORT = '3306'
-        DB_DATABASE = 'pruebainicio'
-        DB_USERNAME = 'laravel_user'
-        DB_PASSWORD = 'admin'
+        DB_CONNECTION = 'sqlite'
+        DB_DATABASE = ':memory:'
     }
 
     stages {
@@ -45,9 +41,9 @@ pipeline {
             }
         }
 
-        stage('Preparar base de datos') {
+        stage('Ejecutar migraciones') {
             steps {
-                echo 'Ejecutando migraciones...'
+                echo 'Ejecutando migraciones en SQLite...'
                 sh 'php artisan migrate --force'
             }
         }
