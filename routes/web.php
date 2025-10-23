@@ -8,7 +8,12 @@ Route::get('/', function () {
 });
 
 Route::get('/metrics', function () {
-    $uptime = now()->diffInSeconds(config('app.start_time', now()));
+    static $startTime;
+    if (!$startTime) {
+        $startTime = microtime(true);
+    }
+
+    $uptime = microtime(true) - $startTime;
     $users = DB::table('users')->count();
 
     $metrics = <<<EOT
@@ -24,5 +29,3 @@ EOT;
 
     return response($metrics, 200)->header('Content-Type', 'text/plain');
 });
-
-
