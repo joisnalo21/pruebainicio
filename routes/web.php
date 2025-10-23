@@ -7,13 +7,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/metrics', function () {
-    static $startTime;
-    if (!$startTime) {
-        $startTime = microtime(true);
-    }
 
+Route::get('/metrics', function () {
+    $startTime = config('app.start_time') ?? microtime(true);
     $uptime = microtime(true) - $startTime;
+
     $users = DB::table('users')->count();
 
     $metrics = <<<EOT
