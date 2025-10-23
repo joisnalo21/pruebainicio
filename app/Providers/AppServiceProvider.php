@@ -20,5 +20,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+        config(['app.start_time' => now()]);
+
     }
 }
