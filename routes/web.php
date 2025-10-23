@@ -7,7 +7,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-oute::get('/metrics', function () {
+Route::get('/metrics', function () {
     $uptime = now()->diffInSeconds(config('app.start_time', now()));
     $users = DB::table('users')->count();
 
