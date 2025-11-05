@@ -11,7 +11,6 @@ Route::get('/', function () {
     return redirect('/login');
 });
 
-
 // Rutas de autenticación (Laravel Breeze)
 require __DIR__.'/auth.php';
 
@@ -25,8 +24,30 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // MÉDICO
-Route::middleware(['auth', 'role:medico'])->group(function () {
-    Route::get('/medico/dashboard', [MedicoController::class, 'index'])->name('medico.dashboard');
+Route::middleware(['auth', 'role:medico'])->prefix('medico')->group(function () {
+    // Dashboard principal
+    Route::get('/dashboard', [MedicoController::class, 'index'])->name('medico.dashboard');
+
+    // -------------------
+    // PACIENTES
+    // -------------------
+    Route::get('/pacientes', [MedicoController::class, 'listarPacientes'])->name('medico.pacientes');
+    Route::get('/pacientes/nuevo', [MedicoController::class, 'crearPaciente'])->name('medico.paciente.nuevo');
+    Route::post('/pacientes/guardar', [MedicoController::class, 'guardarPaciente'])->name('medico.paciente.guardar');
+
+    // -------------------
+    // FORMULARIOS 008
+    // -------------------
+    Route::get('/formularios', [MedicoController::class, 'listarFormularios'])->name('medico.formularios');
+    Route::get('/formularios/nuevo/{paciente}', [MedicoController::class, 'crearFormulario'])->name('medico.formulario.nuevo');
+    Route::post('/formularios/guardar', [MedicoController::class, 'guardarFormulario'])->name('medico.formulario.guardar');
+    Route::get('/formularios/editar/{id}', [MedicoController::class, 'editarFormulario'])->name('medico.formulario.editar');
+    Route::post('/formularios/actualizar/{id}', [MedicoController::class, 'actualizarFormulario'])->name('medico.formulario.actualizar');
+
+    // -------------------
+    // REPORTES MÉDICOS
+    // -------------------
+    Route::get('/reportes', [MedicoController::class, 'reportes'])->name('medico.reportes');
 });
 
 // ENFERMERO
