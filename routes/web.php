@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\EnfermeroController;
+use App\Http\Controllers\MedicoPacienteController;
 
 // Página principal (pública)
 Route::get('/', function () {
@@ -24,38 +25,41 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // MÉDICO
-Route::middleware(['auth', 'role:medico'])->prefix('medico')->group(function () {
-    // Dashboard principal
-    Route::get('/dashboard', [MedicoController::class, 'index'])->name('medico.dashboard');
+Route::middleware(['auth', 'role:medico'])
+    ->prefix('medico')
+    ->name('medico.')
+    ->group(function () {
 
-    // -------------------
-    // PACIENTES
-    // -------------------
-    Route::get('/pacientes', [MedicoController::class, 'listarPacientes'])->name('medico.pacientes');
-    Route::get('/pacientes/nuevo', [MedicoController::class, 'crearPaciente'])->name('medico.paciente.nuevo');
-    Route::post('/pacientes/guardar', [MedicoController::class, 'guardarPaciente'])->name('medico.paciente.guardar');
+        // DASHBOARD
+        Route::get('/dashboard', [MedicoController::class, 'index'])->name('dashboard');
 
-    // -------------------
-    // FORMULARIOS 008
-    // -------------------
-    Route::get('/formularios', [MedicoController::class, 'listarFormularios'])->name('medico.formularios');
-    Route::get('/formularios/nuevo/{paciente}', [MedicoController::class, 'crearFormulario'])->name('medico.formulario.nuevo');
-    Route::post('/formularios/guardar', [MedicoController::class, 'guardarFormulario'])->name('medico.formulario.guardar');
-    Route::get('/formularios/editar/{id}', [MedicoController::class, 'editarFormulario'])->name('medico.formulario.editar');
-    Route::post('/formularios/actualizar/{id}', [MedicoController::class, 'actualizarFormulario'])->name('medico.formulario.actualizar');
+        // PACIENTES (CRUD)
+        Route::get('/pacientes/validar-cedula/{cedula}', [MedicoPacienteController::class, 'validarCedula'])->name('medico.pacientes.validarCedula');
+        Route::get('/pacientes', [MedicoPacienteController::class, 'index'])->name('pacientes.index');
+        Route::get('/pacientes/nuevo', [MedicoPacienteController::class, 'create'])->name('pacientes.create');
+        Route::post('/pacientes', [MedicoPacienteController::class, 'store'])->name('pacientes.store');
+        Route::get('/pacientes/{paciente}/editar', [MedicoPacienteController::class, 'edit'])->name('pacientes.edit');
+        Route::put('/pacientes/{paciente}', [MedicoPacienteController::class, 'update'])->name('pacientes.update');
+        Route::delete('/pacientes/{paciente}', [MedicoPacienteController::class, 'destroy'])->name('pacientes.destroy');
 
-    // -------------------
-    // REPORTES MÉDICOS
-    // -------------------
-    Route::get('/reportes', [MedicoController::class, 'reportes'])->name('medico.reportes');
-});
+        // FORMULARIOS 008
+        Route::get('/formularios', [MedicoController::class, 'listarFormularios'])->name('formularios');
+        Route::get('/formularios/nuevo/{paciente}', [MedicoController::class, 'crearFormulario'])->name('formulario.nuevo');
+        Route::post('/formularios/guardar', [MedicoController::class, 'guardarFormulario'])->name('formulario.guardar');
+        Route::get('/formularios/editar/{id}', [MedicoController::class, 'editarFormulario'])->name('formulario.editar');
+        Route::post('/formularios/actualizar/{id}', [MedicoController::class, 'actualizarFormulario'])->name('formulario.actualizar');
+
+        // REPORTES
+        Route::get('/reportes', [MedicoController::class, 'reportes'])->name('reportes');
+    });
 
 // ENFERMERO
 Route::middleware(['auth', 'role:enfermero'])->group(function () {
-    Route::get('/enfermeria/dashboard', [EnfermeroController::class, 'index'])->name('enfermero.dashboard');
+    Route::get('/enfermeria/dashboard', [App\Http\Controllers\EnfermeroController::class, 'index'])
+        ->name('enfermero.dashboard');
 });
 
-// PERFIL DEL USUARIO (ya viene con Breeze)
+// PERFIL DEL USUARIO (Laravel Breeze)
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

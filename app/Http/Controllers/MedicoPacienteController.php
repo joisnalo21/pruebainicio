@@ -1,0 +1,224 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Paciente;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+
+class MedicoPacienteController extends Controller
+{
+    /**
+     * Listado de pacientes con búsqueda.
+     */
+    public function index(Request $request)
+    {
+        $busqueda = $request->input('buscar');
+
+        $pacientes = Paciente::when($busqueda, function ($query, $busqueda) {
+            $query->where('cedula', 'like', "%$busqueda%")
+                  ->orWhere('primer_nombre', 'like', "%$busqueda%")
+                  ->orWhere('apellido_paterno', 'like', "%$busqueda%");
+        })->paginate(10);
+
+        return view('medico.pacientes.index', compact('pacientes', 'busqueda'));
+    }
+
+    /**
+     * Mostrar formulario de creación.
+     */
+    public function create()
+    {
+        $path = public_path('provincias.json');
+        $json = json_decode(file_get_contents($path), true);
+
+        $provincias = [];
+        foreach ($json as $codigo => $provinciaData) {
+            if (isset($provinciaData['provincia'])) {
+                $provincias[$codigo] = $provinciaData['provincia'];
+            }
+        }
+
+        return view('medico.pacientes.create', compact('provincias'));
+    }
+
+    /**
+     * Guardar nuevo paciente.
+     */
+    public function store(Request $request)
+    {
+        // Validaciones básicas
+        $validated = $request->validate([
+            'cedula'           => ['required', 'digits:10', 'unique:pacientes,cedula'],
+            'primer_nombre'    => ['required', 'string', 'max:100'],
+            'segundo_nombre'   => ['required', 'string', 'max:100'],
+            'apellido_paterno' => ['required', 'string', 'max:100'],
+            'apellido_materno' => ['required', 'string', 'max:100'],
+            'fecha_nacimiento' => ['required', 'date'],
+            'direccion'        => ['required', 'string', 'max:255'],
+            'sexo'             => ['required', 'in:Masculino,Femenino,Otro'],
+            'provincia'        => ['required', 'string', 'max:100'],
+            'canton'           => ['required', 'string', 'max:100'],
+            'parroquia'        => ['required', 'string', 'max:100'],
+            'telefono'         => ['required', 'digits:10'],
+            'ocupacion'        => ['required', 'string', 'max:100'],
+        ], [
+            'cedula.required' => 'La cédula es obligatoria.',
+            'cedula.unique'   => 'Ya existe un paciente con esta cédula.',
+            'cedula.digits'   => 'La cédula debe tener exactamente 10 dígitos.',
+            'telefono.digits' => 'El teléfono debe tener 10 números.',
+            'required'        => 'El campo :attribute es obligatorio.',
+        ]);
+
+        // Validación de cédula ecuatoriana real
+        if (!$this->cedulaEcuatorianaValida($request->cedula)) {
+            return back()->withErrors(['cedula' => 'La cédula ingresada no es válida.'])
+                         ->withInput();
+        }
+
+        // Calcular edad automáticamente
+        $validated['edad'] = Carbon::parse($request->fecha_nacimiento)->age;
+
+        // Guardar paciente
+        Paciente::create($validated);
+
+        return redirect()->route('medico.pacientes.index')
+                         ->with('success', 'Paciente registrado correctamente.');
+    }
+
+    /**
+     * Editar paciente.
+     */
+    public function edit(Paciente $paciente)
+    {
+        $path = public_path('provincias.json');
+        $json = json_decode(file_get_contents($path), true);
+
+        $provincias = [];
+        foreach ($json as $codigo => $provinciaData) {
+            if (isset($provinciaData['provincia'])) {
+                $provincias[$codigo] = $provinciaData['provincia'];
+            }
+        }
+
+        return view('medico.pacientes.edit', compact('paciente', 'provincias'));
+    }
+
+    /**
+     * Actualizar paciente existente.
+     */
+    public function update(Request $request, Paciente $paciente)
+{
+    $data = $request->validate([
+        'cedula' => 'required|max:10',
+        'primer_nombre' => 'required',
+        'segundo_nombre' => 'required',
+        'apellido_paterno' => 'required',
+        'apellido_materno' => 'required',
+        'fecha_nacimiento' => 'required|date',
+        'edad' => 'nullable|integer',
+        'direccion' => 'required',
+        'sexo' => 'required',
+        'provincia' => 'required',
+        'canton' => 'required',
+        'parroquia' => 'required',
+        'telefono' => 'required|max:10',
+        'ocupacion' => 'required',
+    ]);
+
+    $paciente->update($data);
+
+    return redirect()->route('medico.pacientes.index')
+        ->with('success', 'Paciente actualizado correctamente');
+}
+
+
+    /**
+     * Eliminar paciente.
+     */
+    public function destroy(Paciente $paciente)
+    {
+        $paciente->delete();
+        return redirect()->route('medico.pacientes.index')->with('success', 'Paciente eliminado correctamente.');
+    }
+
+    /**
+     * Valida una cédula ecuatoriana.
+     */
+    /*private function validarCedulaEcuatoriana($cedula)
+    {
+        if (strlen($cedula) !== 10 || !ctype_digit($cedula)) {
+            return false;
+        }
+
+        $provincia = (int) substr($cedula, 0, 2);
+        if ($provincia < 1 || $provincia > 24) return false;
+
+        $ultimo = (int) substr($cedula, 9, 1);
+        $pares = 0;
+        $impares = 0;
+
+        for ($i = 0; $i < 9; $i++) {
+            $num = (int) substr($cedula, $i, 1);
+            if ($i % 2 == 0) {
+                $num *= 2;
+                if ($num > 9) $num -= 9;
+                $impares += $num;
+            } else {
+                $pares += $num;
+            }
+        }
+
+        $suma = $pares + $impares;
+        $decena = ((int)(($suma + 10) / 10)) * 10;
+        $validador = $decena - $suma;
+        if ($validador == 10) $validador = 0;
+
+        return $validador == $ultimo;
+    }*/
+public function validarCedula($cedula)
+{
+    // Validar formato
+    if (!preg_match('/^[0-9]{10}$/', $cedula)) {
+        return response()->json(['valido' => false, 'mensaje' => 'Debe tener 10 dígitos numéricos.']);
+    }
+
+    // Validar estructura ecuatoriana
+    if (!$this->cedulaEcuatorianaValida($cedula)) {
+        return response()->json(['valido' => false, 'mensaje' => 'Cédula inválida.']);
+    }
+
+    // Verificar duplicado
+    if (Paciente::where('cedula', $cedula)->exists()) {
+        return response()->json(['valido' => false, 'mensaje' => 'Esta cédula ya está registrada.']);
+    }
+
+    return response()->json(['valido' => true, 'mensaje' => 'Cédula válida.']);
+}
+
+// Función auxiliar para validar estructura de la cédula
+private function cedulaEcuatorianaValida($cedula)
+{
+    if (strlen($cedula) !== 10) return false;
+    $provincia = intval(substr($cedula, 0, 2));
+    if ($provincia < 1 || $provincia > 24) return false;
+
+    $digitoVerificador = intval(substr($cedula, 9, 1));
+    $suma = 0;
+    for ($i = 0; $i < 9; $i++) {
+        $num = intval($cedula[$i]);
+        if ($i % 2 === 0) {
+            $num *= 2;
+            if ($num > 9) $num -= 9;
+        }
+        $suma += $num;
+    }
+    $resultado = 10 - ($suma % 10);
+    if ($resultado == 10) $resultado = 0;
+    return $resultado == $digitoVerificador;
+}
+
+
+}
+
+

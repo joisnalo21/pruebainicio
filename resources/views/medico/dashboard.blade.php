@@ -40,7 +40,7 @@
     </div>
 
     <div class="flex gap-4">
-      <a href="{{ route('medico.pacientes') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow">🧍‍♂️ Gestionar Pacientes</a>
+      <a href="{{ route('medico.pacientes.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow">🧍‍♂️ Gestionar Pacientes</a>
       <a href="{{ route('medico.formularios') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow">📋 Formularios 008</a>
       <a href="{{ route('medico.reportes') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-semibold shadow">📊 Reportes</a>
     </div>
