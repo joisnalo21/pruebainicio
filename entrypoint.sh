@@ -1,24 +1,28 @@
-#!/bin/bash
-set -e
+#!/bin/sh
 
-echo "⏳ Esperando que MySQL esté listo..."
-until php -r "try {
-    new PDO('mysql:host=' . getenv('DB_HOST') . ';port=' . getenv('DB_PORT') . ';dbname=' . getenv('DB_DATABASE'),
-    getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
+echo "⌛ Esperando a que MySQL acepte conexiones externas..."
+until php -r "
+try {
+    \$pdo = new PDO(
+        'mysql:host=' . getenv('DB_HOST') . ';port=' . getenv('DB_PORT') . ';dbname=' . getenv('DB_DATABASE'),
+        getenv('DB_USERNAME'),
+        getenv('DB_PASSWORD')
+    );
+    echo '✅ Conexión establecida con MySQL.' . PHP_EOL;
     exit(0);
 } catch (Exception \$e) {
-    echo '.';
-    sleep(2);
-}"; do :; done
+    echo '⏳ Aún no disponible: ' . \$e->getMessage() . PHP_EOL;
+    exit(1);
+}" >/dev/null 2>&1; do
+    sleep 2
+done
 
-echo -e "\n✅ MySQL disponible. Ejecutando migraciones..."
-php artisan migrate --force || true
+# Limpieza de caché y migraciones
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+php artisan migrate --force
 
-echo "🧹 Limpiando caché de Laravel..."
-php artisan config:clear || true
-php artisan cache:clear || true
-php artisan route:clear || true
-php artisan view:clear || true
-
-echo "🚀 Iniciando servidor Laravel..."
+# Ejecutar Laravel
 exec php artisan serve --host=0.0.0.0 --port=8000
