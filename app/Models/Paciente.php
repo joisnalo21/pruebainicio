@@ -18,13 +18,24 @@ class Paciente extends Model
         'apellido_materno',
         'fecha_nacimiento',
         'edad',
-        'sexo',
         'direccion',
+        'sexo',
         'provincia',
         'canton',
         'parroquia',
         'telefono',
         'ocupacion',
+
+        // NUEVOS CAMPOS
+        'zona',
+        'barrio',
+        'lugar_nacimiento',
+        'nacionalidad',
+        'grupo_cultural',
+        'estado_civil',
+        'instruccion',
+        'empresa',
+        'seguro_salud',
     ];
 
     // ✅ Calcula la edad automáticamente cuando se asigna fecha_nacimiento

@@ -49,19 +49,31 @@ class MedicoPacienteController extends Controller
     {
         // Validaciones básicas
         $validated = $request->validate([
-            'cedula'           => ['required', 'digits:10', 'unique:pacientes,cedula'],
-            'primer_nombre'    => ['required', 'string', 'max:100'],
-            'segundo_nombre'   => ['required', 'string', 'max:100'],
-            'apellido_paterno' => ['required', 'string', 'max:100'],
-            'apellido_materno' => ['required', 'string', 'max:100'],
-            'fecha_nacimiento' => ['required', 'date'],
-            'direccion'        => ['required', 'string', 'max:255'],
-            'sexo'             => ['required', 'in:Masculino,Femenino,Otro'],
-            'provincia'        => ['required', 'string', 'max:100'],
-            'canton'           => ['required', 'string', 'max:100'],
-            'parroquia'        => ['required', 'string', 'max:100'],
-            'telefono'         => ['required', 'digits:10'],
-            'ocupacion'        => ['required', 'string', 'max:100'],
+        'cedula' => 'required|digits:10|unique:pacientes,cedula',
+        'primer_nombre' => 'required',
+        'segundo_nombre' => 'required',
+        'apellido_paterno' => 'required',
+        'apellido_materno' => 'required',
+        'fecha_nacimiento' => 'required|date',
+        'edad' => 'nullable|numeric',
+        'direccion' => 'required',
+        'sexo' => 'required',
+        'provincia' => 'required',
+        'canton' => 'required',
+        'parroquia' => 'required',
+        'telefono' => 'required|digits:10',
+        'ocupacion' => 'required',
+
+        // NUEVOS CAMPOS
+        'zona' => 'required',
+        'barrio' => 'required',
+        'lugar_nacimiento' => 'required',
+        'nacionalidad' => 'required',
+        'grupo_cultural' => 'nullable',
+        'estado_civil' => 'nullable',
+        'instruccion' => 'nullable',
+        'empresa' => 'nullable',
+        'seguro_salud' => 'nullable',
         ], [
             'cedula.required' => 'La cédula es obligatoria.',
             'cedula.unique'   => 'Ya existe un paciente con esta cédula.',
@@ -110,20 +122,31 @@ class MedicoPacienteController extends Controller
     public function update(Request $request, Paciente $paciente)
 {
     $data = $request->validate([
-        'cedula' => 'required|max:10',
+        'cedula' => 'required|digits:10|unique:pacientes,cedula,' . $paciente->id,
         'primer_nombre' => 'required',
         'segundo_nombre' => 'required',
         'apellido_paterno' => 'required',
         'apellido_materno' => 'required',
         'fecha_nacimiento' => 'required|date',
-        'edad' => 'nullable|integer',
+        'edad' => 'nullable|numeric',
         'direccion' => 'required',
         'sexo' => 'required',
         'provincia' => 'required',
         'canton' => 'required',
         'parroquia' => 'required',
-        'telefono' => 'required|max:10',
+        'telefono' => 'required|digits:10',
         'ocupacion' => 'required',
+
+        // NUEVOS CAMPOS
+        'zona' => 'required',
+        'barrio' => 'required',
+        'lugar_nacimiento' => 'required',
+        'nacionalidad' => 'required',
+        'grupo_cultural' => 'nullable',
+        'estado_civil' => 'nullable',
+        'instruccion' => 'nullable',
+        'empresa' => 'nullable',
+        'seguro_salud' => 'nullable',
     ]);
 
     $paciente->update($data);
@@ -142,40 +165,6 @@ class MedicoPacienteController extends Controller
         return redirect()->route('medico.pacientes.index')->with('success', 'Paciente eliminado correctamente.');
     }
 
-    /**
-     * Valida una cédula ecuatoriana.
-     */
-    /*private function validarCedulaEcuatoriana($cedula)
-    {
-        if (strlen($cedula) !== 10 || !ctype_digit($cedula)) {
-            return false;
-        }
-
-        $provincia = (int) substr($cedula, 0, 2);
-        if ($provincia < 1 || $provincia > 24) return false;
-
-        $ultimo = (int) substr($cedula, 9, 1);
-        $pares = 0;
-        $impares = 0;
-
-        for ($i = 0; $i < 9; $i++) {
-            $num = (int) substr($cedula, $i, 1);
-            if ($i % 2 == 0) {
-                $num *= 2;
-                if ($num > 9) $num -= 9;
-                $impares += $num;
-            } else {
-                $pares += $num;
-            }
-        }
-
-        $suma = $pares + $impares;
-        $decena = ((int)(($suma + 10) / 10)) * 10;
-        $validador = $decena - $suma;
-        if ($validador == 10) $validador = 0;
-
-        return $validador == $ultimo;
-    }*/
 public function validarCedula($cedula)
 {
     // Validar formato

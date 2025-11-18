@@ -1,4 +1,4 @@
-@extends('layouts.medico')
+    @extends('layouts.medico')
 
 @section('title', 'Registrar Paciente')
 
@@ -64,6 +64,23 @@
                 </div>
             </div>
 
+            {{-- Lugar de nacimiento / Nacionalidad --}}
+<div class="grid grid-cols-2 gap-6">
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Lugar de nacimiento *</label>
+        <input type="text" name="lugar_nacimiento" value="{{ old('lugar_nacimiento') }}" required
+               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+    </div>
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Nacionalidad *</label>
+        <select id="nacionalidad" name="nacionalidad" required
+                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            <option value="">Cargando países...</option>
+        </select>
+    </div>
+</div>
+
+
             {{-- Fecha de nacimiento y edad --}}
             <div class="grid grid-cols-2 gap-6">
                 <div>
@@ -78,14 +95,6 @@
                            value="{{ old('edad') }}"
                            class="w-full bg-gray-100 border border-gray-300 rounded-lg px-4 py-2">
                 </div>
-            </div>
-
-            {{-- Dirección --}}
-            <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección *</label>
-                <input type="text" name="direccion" value="{{ old('direccion') }}" required
-                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-            </div>
 
             {{-- Sexo --}}
             <div>
@@ -97,6 +106,53 @@
                     <option value="Femenino" {{ old('sexo') == 'Femenino' ? 'selected' : '' }}>Femenino</option>
                     <option value="Otro" {{ old('sexo') == 'Otro' ? 'selected' : '' }}>Otro</option>
                 </select>
+            </div>    {{-- Grupo cultural / Estado civil --}}
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Grupo cultural</label>
+                    <input type="text" name="grupo_cultural" value="{{ old('grupo_cultural') }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Estado civil</label>
+                    <select name="estado_civil"
+                            class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                        <option value="">Seleccione</option>
+                        <option value="Soltero/a">Soltero/a</option>
+                        <option value="Casado/a">Casado/a</option>
+                        <option value="Divorciado/a">Divorciado/a</option>
+                        <option value="Viudo/a">Viudo/a</option>
+                        <option value="Unión libre">Unión libre</option>
+                    </select>
+                </div>
+            </div>
+
+            {{-- Instrucción / Ocupación --}}
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Instrucción (último año aprobado)</label>
+                    <input type="text" name="instruccion" value="{{ old('instruccion') }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Ocupación *</label>
+                    <input type="text" name="ocupacion" value="{{ old('ocupacion') }}" required
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
+            </div>
+
+            {{-- Empresa / Seguro de salud --}}
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Empresa donde trabaja</label>
+                    <input type="text" name="empresa" value="{{ old('empresa') }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Tipo de seguro de salud</label>
+                    <input type="text" name="seguro_salud" value="{{ old('seguro_salud') }}"
+                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                </div>
             </div>
 
             {{-- Provincia, Cantón, Parroquia --}}
@@ -130,19 +186,34 @@
                     </select>
                 </div>
             </div>
+            {{-- Zona --}}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Zona *</label>
+                <select name="zona" required
+                        class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    <option value="">Seleccione zona</option>
+                    <option value="Urbana" {{ old('zona') == 'Urbana' ? 'selected' : '' }}>Urbana</option>
+                    <option value="Rural" {{ old('zona') == 'Rural' ? 'selected' : '' }}>Rural</option>
+                </select>
+            </div>
+            {{-- Barrio --}}
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Barrio *</label>
+    <input type="text" name="barrio" value="{{ old('barrio') }}" required
+           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+</div>
 
-            {{-- Teléfono y ocupación --}}
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono *</label>
-                    <input type="text" name="telefono" maxlength="10" value="{{ old('telefono') }}" required
-                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Ocupación *</label>
-                    <input type="text" name="ocupacion" value="{{ old('ocupacion') }}" required
-                           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
-                </div>
+{{-- Dirección --}}
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-1">Dirección *</label>
+    <input type="text" name="direccion" value="{{ old('direccion') }}" required
+           class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+</div>
+            {{-- Teléfono --}}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono *</label>
+                <input type="text" name="telefono" maxlength="10" value="{{ old('telefono') }}" required
+                       class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
             </div>
 
             {{-- Botones --}}
@@ -164,7 +235,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // === CARGA DE JSON ===
+    // === CARGA DE PROVINCIAS ===
     let provinciasJSON = {};
     const oldProvincia = "{{ old('provincia') }}";
     const oldCanton = "{{ old('canton') }}";
@@ -218,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // === CALCULAR EDAD AUTOMÁTICAMENTE ===
+    // === CALCULAR EDAD ===
     const fechaNacimiento = document.getElementById('fecha_nacimiento');
     const edadInput = document.getElementById('edad');
 
@@ -234,6 +305,35 @@ document.addEventListener('DOMContentLoaded', function () {
             edadInput.value = '';
         }
     });
+
+    // === CARGAR LISTA DE PAÍSES ===
+fetch('{{ asset('countries.json') }}')
+    .then(res => res.json())
+    .then(paises => {
+
+        const selectPais = document.getElementById('nacionalidad');
+        selectPais.innerHTML = ''; // Limpia contenido inicial
+
+        const oldPais = "{{ old('nacionalidad', 'Ecuador') }}";
+
+        paises.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.name;
+            option.textContent = p.name;
+
+            // Selección por defecto → Ecuador
+            if (p.name === oldPais) {
+                option.selected = true;
+            }
+
+            selectPais.appendChild(option);
+        });
+    })
+    .catch(() => {
+        document.getElementById('nacionalidad').innerHTML =
+            '<option value="">Error cargando países</option>';
+    });
+
 });
 
 // === VALIDACIÓN CÉDULA EN TIEMPO REAL ===
