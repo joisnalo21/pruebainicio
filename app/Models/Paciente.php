@@ -53,4 +53,9 @@ class Paciente extends Model
     {
         return trim("{$this->primer_nombre} {$this->segundo_nombre} {$this->apellido_paterno} {$this->apellido_materno}");
     }
+    public function formularios008()
+{
+    return $this->hasMany(Formulario008::class);
+}
+
 }

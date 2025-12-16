@@ -34,20 +34,60 @@ Route::middleware(['auth', 'role:medico'])
         Route::get('/dashboard', [MedicoController::class, 'index'])->name('dashboard');
 
         // PACIENTES (CRUD)
-        Route::get('/pacientes/validar-cedula/{cedula}', [MedicoPacienteController::class, 'validarCedula'])->name('medico.pacientes.validarCedula');
-        Route::get('/pacientes', [MedicoPacienteController::class, 'index'])->name('pacientes.index');
-        Route::get('/pacientes/nuevo', [MedicoPacienteController::class, 'create'])->name('pacientes.create');
-        Route::post('/pacientes', [MedicoPacienteController::class, 'store'])->name('pacientes.store');
-        Route::get('/pacientes/{paciente}/editar', [MedicoPacienteController::class, 'edit'])->name('pacientes.edit');
-        Route::put('/pacientes/{paciente}', [MedicoPacienteController::class, 'update'])->name('pacientes.update');
-        Route::delete('/pacientes/{paciente}', [MedicoPacienteController::class, 'destroy'])->name('pacientes.destroy');
+        Route::get('/pacientes/validar-cedula/{cedula}', [MedicoPacienteController::class, 'validarCedula'])
+            ->name('pacientes.validarCedula');
 
-        // FORMULARIOS 008
-        Route::get('/formularios', [MedicoController::class, 'listarFormularios'])->name('formularios');
+        Route::get('/pacientes', [MedicoPacienteController::class, 'index'])
+            ->name('pacientes.index');
+
+        Route::get('/pacientes/nuevo', [MedicoPacienteController::class, 'create'])
+            ->name('pacientes.create');
+
+        Route::post('/pacientes', [MedicoPacienteController::class, 'store'])
+            ->name('pacientes.store');
+
+        Route::get('/pacientes/{paciente}/editar', [MedicoPacienteController::class, 'edit'])
+            ->name('pacientes.edit');
+
+        Route::put('/pacientes/{paciente}', [MedicoPacienteController::class, 'update'])
+            ->name('pacientes.update');
+
+        Route::delete('/pacientes/{paciente}', [MedicoPacienteController::class, 'destroy'])
+            ->name('pacientes.destroy');
+
+        // ----------------------------------------------------
+        // FORMULARIOS 008 (FLUJO NUEVO: Selección -> Borrador -> Wizard)
+        // ----------------------------------------------------
+
+        // Listado principal de formularios
+        Route::get('/formularios', [MedicoController::class, 'listarFormularios'])
+            ->name('formularios');
+
+        // Seleccionar paciente antes de crear 008
+        Route::get('/formularios/nuevo', [MedicoController::class, 'seleccionarPaciente'])
+            ->name('formularios.nuevo');
+
+        // Crear el formulario en borrador
+        Route::post('/formularios/iniciar', [MedicoController::class, 'iniciarFormulario008'])
+            ->name('formularios.iniciar');
+
+        // Wizard por pasos (temporal por ahora)
+        Route::get('/formularios/{formulario}/paso/{paso}', [MedicoController::class, 'wizardPaso'])
+            ->name('formularios.paso');
+
+        Route::post('/formularios/{formulario}/paso/{paso}', [MedicoController::class, 'guardarPaso'])
+    ->name('formularios.paso.store');
+
+
+        // ----------------------------------------------------
+        // (LEGACY) CRUD viejo - recomendado: eliminar o dejar comentado
+        // ----------------------------------------------------
+        /*
         Route::get('/formularios/nuevo/{paciente}', [MedicoController::class, 'crearFormulario'])->name('formulario.nuevo');
         Route::post('/formularios/guardar', [MedicoController::class, 'guardarFormulario'])->name('formulario.guardar');
         Route::get('/formularios/editar/{id}', [MedicoController::class, 'editarFormulario'])->name('formulario.editar');
         Route::post('/formularios/actualizar/{id}', [MedicoController::class, 'actualizarFormulario'])->name('formulario.actualizar');
+        */
 
         // REPORTES
         Route::get('/reportes', [MedicoController::class, 'reportes'])->name('reportes');
@@ -55,7 +95,7 @@ Route::middleware(['auth', 'role:medico'])
 
 // ENFERMERO
 Route::middleware(['auth', 'role:enfermero'])->group(function () {
-    Route::get('/enfermeria/dashboard', [App\Http\Controllers\EnfermeroController::class, 'index'])
+    Route::get('/enfermeria/dashboard', [EnfermeroController::class, 'index'])
         ->name('enfermero.dashboard');
 });
 
