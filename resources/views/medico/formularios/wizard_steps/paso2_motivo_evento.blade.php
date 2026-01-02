@@ -194,7 +194,7 @@
                 <input type="checkbox" name="no_aplica_custodia_policial" value="1"
                        class="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
                        {{ old('no_aplica_custodia_policial', $formulario->no_aplica_custodia_policial) ? 'checked' : '' }}>
-                No aplica custodia policial
+                Custodia policial
             </label>
 
             <div class="flex items-center gap-2">
