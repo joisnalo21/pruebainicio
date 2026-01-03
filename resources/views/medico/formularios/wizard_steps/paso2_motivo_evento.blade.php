@@ -118,8 +118,29 @@
 
     {{-- Sección 3 --}}
     <div class="rounded-2xl border border-gray-200 bg-white p-5">
-        <h3 class="text-lg font-semibold text-gray-900 mb-1">Accidente / violencia / intoxicación / otros</h3>
+        <div class="flex items-start justify-between gap-4 mb-1">
+    <h3 class="text-lg font-semibold text-gray-900">
+        Accidente / violencia / intoxicación / otros
+    </h3>
+
+    <label class="inline-flex items-center gap-2 text-sm text-gray-700 select-none">
+        <input
+            type="checkbox"
+            name="no_aplica_apartado_3"
+            id="no_aplica_apartado_3"
+            value="1"
+            class="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+            @checked(old('no_aplica_apartado_3', $formulario->no_aplica_apartado_3))
+        >
+        <span>No aplica</span>
+    </label>
+</div>
+
+        
         <p class="text-sm text-gray-500 mb-4">Marca lo que corresponda y agrega detalles si aplica.</p>
+
+        <div id="apartado_3_wrapper" class="space-y-4">
+
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -191,11 +212,12 @@
 
         <div class="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
-                <input type="checkbox" name="no_aplica_custodia_policial" value="1"
-                       class="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
-                       {{ old('no_aplica_custodia_policial', $formulario->no_aplica_custodia_policial) ? 'checked' : '' }}>
-                Custodia policial
-            </label>
+    <input type="checkbox" name="custodia_policial" value="1"
+           class="rounded border-gray-300 text-gray-900 focus:ring-gray-900"
+           {{ old('custodia_policial', $formulario->custodia_policial) ? 'checked' : '' }}>
+    Custodia policial
+</label>
+
 
             <div class="flex items-center gap-2">
                 <label class="inline-flex items-center gap-2 text-sm font-medium text-gray-700">
@@ -219,6 +241,7 @@
                       placeholder="Describe brevemente lo ocurrido, cronología y detalles relevantes...">{{ old('evento_observaciones', $formulario->evento_observaciones) }}</textarea>
         </div>
     </div>
+</div>
 
     <div class="flex flex-col sm:flex-row gap-2 justify-end pt-2">
         <button type="submit" name="accion" value="save"
@@ -232,3 +255,34 @@
         </button>
     </div>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const chk = document.getElementById('no_aplica_apartado_3');
+  const wrap = document.getElementById('apartado_3_wrapper');
+
+  function setApartado3Disabled(disabled) {
+    if (!wrap) return;
+
+    // UI: “gris” + sin interacción
+    wrap.classList.toggle('opacity-50', disabled);
+    wrap.classList.toggle('pointer-events-none', disabled);
+
+    // Deshabilita y limpia valores
+    const fields = wrap.querySelectorAll('input, select, textarea');
+    fields.forEach(el => {
+      el.disabled = disabled;
+
+      if (disabled) {
+        if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+        else el.value = '';
+      }
+    });
+  }
+
+  setApartado3Disabled(!!chk?.checked);
+
+  chk?.addEventListener('change', () => {
+    setApartado3Disabled(chk.checked);
+  });
+});
+</script>

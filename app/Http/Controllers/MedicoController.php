@@ -268,7 +268,8 @@ class MedicoController extends Controller
                 'evento_tipos' => ['nullable', 'array'],
                 'evento_tipos.*' => ['in:' . implode(',', $allowedTipos)],
 
-                'no_aplica_custodia_policial' => ['nullable', 'boolean'],
+               'custodia_policial' => ['nullable', 'boolean'],
+'no_aplica_apartado_3' => ['nullable', 'boolean'],
                 'evento_observaciones' => ['nullable', 'string'],
 
                 'aliento_etilico' => ['nullable', 'boolean'],
@@ -285,11 +286,28 @@ class MedicoController extends Controller
             }
 
             $data['notificacion_policia'] = (bool) $request->boolean('notificacion_policia');
-            $data['no_aplica_custodia_policial'] = (bool) $request->boolean('no_aplica_custodia_policial');
+            $data['custodia_policial'] = (bool) $request->boolean('custodia_policial');
+$data['no_aplica_apartado_3'] = (bool) $request->boolean('no_aplica_apartado_3');
             $data['aliento_etilico'] = (bool) $request->boolean('aliento_etilico');
+
+
+
+if ($data['no_aplica_apartado_3']) {
+    $data['evento_fecha_hora'] = null;
+    $data['evento_lugar'] = null;
+    $data['evento_direccion'] = null;
+    $data['evento_tipos'] = null;
+    $data['custodia_policial'] = false;
+    $data['aliento_etilico'] = false;
+    $data['valor_alcochek'] = null;
+    $data['evento_observaciones'] = null;
+}
+
 
             $form->fill($data);
             $form->estado = 'borrador';
+
+
 
             if ($form->paso_actual < 3) {
                 $form->paso_actual = 3;

@@ -6,6 +6,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\EnfermeroController;
 use App\Http\Controllers\MedicoPacienteController;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 // Página principal (pública)
 Route::get('/', function () {
@@ -29,6 +31,18 @@ Route::middleware(['auth', 'role:medico'])
     ->prefix('medico')
     ->name('medico.')
     ->group(function () {
+Route::get('/debug/db', function () {
+    return response()->json([
+        'database' => DB::select('select database() as db')[0]->db ?? null,
+        'server'   => DB::select('select @@hostname as host, @@port as port')[0] ?? null,
+        'has_no_aplica_apartado_3' => Schema::hasColumn('formularios008','no_aplica_apartado_3'),
+        'has_custodia_policial'    => Schema::hasColumn('formularios008','custodia_policial'),
+    ]);
+})->name('debug.db');
+
+
+
+
 
         // DASHBOARD
         Route::get('/dashboard', [MedicoController::class, 'index'])->name('dashboard');
@@ -79,15 +93,7 @@ Route::middleware(['auth', 'role:medico'])
     ->name('formularios.paso.store');
 
 
-        // ----------------------------------------------------
-        // (LEGACY) CRUD viejo - recomendado: eliminar o dejar comentado
-        // ----------------------------------------------------
-        /*
-        Route::get('/formularios/nuevo/{paciente}', [MedicoController::class, 'crearFormulario'])->name('formulario.nuevo');
-        Route::post('/formularios/guardar', [MedicoController::class, 'guardarFormulario'])->name('formulario.guardar');
-        Route::get('/formularios/editar/{id}', [MedicoController::class, 'editarFormulario'])->name('formulario.editar');
-        Route::post('/formularios/actualizar/{id}', [MedicoController::class, 'actualizarFormulario'])->name('formulario.actualizar');
-        */
+
 
         // REPORTES
         Route::get('/reportes', [MedicoController::class, 'reportes'])->name('reportes');
@@ -105,3 +111,5 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+

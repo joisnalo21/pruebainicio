@@ -1,5 +1,13 @@
-<?php 
-public function index(Request $request)
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Form008;
+
+class Form008Controller extends Controller
+{
+    public function index(Request $request)
 {
     // estadísticas
     $stats = [
@@ -29,5 +37,5 @@ public function index(Request $request)
     $formularios = $query->orderBy('created_at', 'DESC')->paginate(10);
 
     return view('form008.index', compact('formularios', 'stats'));
+    }
 }
-</php>
