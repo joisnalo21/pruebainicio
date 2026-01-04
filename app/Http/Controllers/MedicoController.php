@@ -792,10 +792,351 @@ class MedicoController extends Controller
         }
 
 
+        if ($paso === 9) {
+
+            $data = $request->validate([
+                'no_aplica_obstetrica' => ['nullable', 'boolean'],
+
+                'obst_gestas' => ['nullable', 'integer', 'min:0', 'max:20'],
+                'obst_partos' => ['nullable', 'integer', 'min:0', 'max:20'],
+                'obst_abortos' => ['nullable', 'integer', 'min:0', 'max:20'],
+                'obst_cesareas' => ['nullable', 'integer', 'min:0', 'max:20'],
+
+                'obst_fum' => ['nullable', 'date'],
+                'obst_semanas_gestacion' => ['nullable', 'integer', 'min:0', 'max:45'],
+
+                'obst_movimiento_fetal' => ['nullable', 'in:presente,ausente,no_eval'],
+
+                'obst_frecuencia_fetal' => ['nullable', 'integer', 'min:0', 'max:300'],
+                'obst_altura_uterina' => ['nullable', 'numeric', 'min:0', 'max:99.99'],
+
+                'obst_membranas_rotas' => ['nullable', 'boolean'],
+                'obst_tiempo_membranas_rotas' => ['nullable', 'string', 'max:255'],
+
+                'obst_presentacion' => ['nullable', 'string', 'max:255'],
+
+                'obst_dilatacion_cm' => ['nullable', 'numeric', 'min:0', 'max:10'],
+                'obst_borramiento_pct' => ['nullable', 'integer', 'min:0', 'max:100'],
+
+                'obst_plano' => ['nullable', 'string', 'max:255'],
+                'obst_pelvis_util' => ['nullable', 'in:si,no,no_eval'],
+
+                'obst_sangrado_vaginal' => ['nullable', 'boolean'],
+                'obst_contracciones' => ['nullable', 'boolean'],
+
+                'obst_texto' => ['nullable', 'string'],
+            ]);
+
+            // Booleans normalizados
+            $data['no_aplica_obstetrica'] = (bool) $request->boolean('no_aplica_obstetrica');
+            $data['obst_membranas_rotas'] = (bool) $request->boolean('obst_membranas_rotas');
+            $data['obst_sangrado_vaginal'] = (bool) $request->boolean('obst_sangrado_vaginal');
+            $data['obst_contracciones'] = (bool) $request->boolean('obst_contracciones');
+
+            // Si “no aplica”, vaciamos todo
+            if ($data['no_aplica_obstetrica']) {
+                foreach (
+                    [
+                        'obst_gestas',
+                        'obst_partos',
+                        'obst_abortos',
+                        'obst_cesareas',
+                        'obst_fum',
+                        'obst_semanas_gestacion',
+                        'obst_movimiento_fetal',
+                        'obst_frecuencia_fetal',
+                        'obst_altura_uterina',
+                        'obst_tiempo_membranas_rotas',
+                        'obst_presentacion',
+                        'obst_dilatacion_cm',
+                        'obst_borramiento_pct',
+                        'obst_plano',
+                        'obst_pelvis_util',
+                        'obst_texto',
+                    ] as $k
+                ) {
+                    $data[$k] = null;
+                }
+                $data['obst_membranas_rotas'] = false;
+                $data['obst_sangrado_vaginal'] = false;
+                $data['obst_contracciones'] = false;
+            } else {
+                // Si membranas NO rotas, limpiamos el tiempo
+                if (!$data['obst_membranas_rotas']) {
+                    $data['obst_tiempo_membranas_rotas'] = null;
+                }
+            }
+
+            $form->fill($data);
+            $form->estado = 'borrador';
+
+            // Avanza paso_actual
+            if ($form->paso_actual < 10) {
+                $form->paso_actual = 10;
+            }
+
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Paso 9 guardado (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 10,
+            ])->with('success', 'Paso 9 guardado. Continúa al paso 10.');
+        }
+
+
+        if ($paso === 10) {
+
+            $allowed = [
+                '1_biometria',
+                '2_uroanalisis',
+                '3_quimica_sanguinea',
+                '4_electrolitos',
+                '5_gasometria',
+                '6_electrocardiograma',
+                '7_endoscopia',
+                '8_rx_torax',
+                '9_rx_abdomen',
+                '10_rx_osea',
+                '11_tomografia',
+                '12_resonancia',
+                '13_ecografia_pelvica',
+                '14_ecografia_abdomen',
+                '15_interconsulta',
+                '16_otros',
+            ];
+
+            $data = $request->validate([
+                'no_aplica_examenes' => ['nullable', 'boolean'],
+                'examenes_solicitados' => ['nullable', 'array'],
+                'examenes_solicitados.*' => ['in:' . implode(',', $allowed)],
+                'examenes_comentarios' => ['nullable', 'string'],
+            ]);
+
+            $data['no_aplica_examenes'] = (bool) $request->boolean('no_aplica_examenes');
+
+            if ($data['no_aplica_examenes']) {
+                $data['examenes_solicitados'] = null;
+                $data['examenes_comentarios'] = null;
+            }
+
+            $form->fill($data);
+            $form->estado = 'borrador';
+
+            // Avanza paso_actual al siguiente (si tu siguiente paso es 11)
+            if ($form->paso_actual < 11) {
+                $form->paso_actual = 11;
+            }
+
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Solicitud de exámenes guardada (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 11,
+            ])->with('success', 'Solicitud de exámenes guardada. Continúa al paso 11.');
+        }
+
+        if ($paso === 11) {
+
+            $data = $request->validate([
+                'diagnosticos_ingreso' => ['nullable', 'array'],
+                'diagnosticos_ingreso.*.dx' => ['nullable', 'string', 'max:255'],
+                'diagnosticos_ingreso.*.cie' => ['nullable', 'string', 'max:20'],
+                'diagnosticos_ingreso.*.tipo' => ['nullable', 'in:pre,def'],
+
+                'diagnosticos_alta' => ['nullable', 'array'],
+                'diagnosticos_alta.*.dx' => ['nullable', 'string', 'max:255'],
+                'diagnosticos_alta.*.cie' => ['nullable', 'string', 'max:20'],
+                'diagnosticos_alta.*.tipo' => ['nullable', 'in:pre,def'],
+            ]);
+
+            $normalize3 = function (array $rows = []) {
+                $normalized = [];
+                for ($i = 1; $i <= 3; $i++) {
+                    $dx = trim((string)($rows[$i]['dx'] ?? ''));
+                    $cie = trim((string)($rows[$i]['cie'] ?? ''));
+                    $tipo = $rows[$i]['tipo'] ?? null;
+
+                    $normalized[$i] = [
+                        'n' => $i,
+                        'dx' => $dx !== '' ? $dx : null,
+                        'cie' => $cie !== '' ? $cie : null,
+                        'tipo' => in_array($tipo, ['pre', 'def'], true) ? $tipo : null,
+                    ];
+                }
+                return $normalized;
+            };
+
+            $form->fill([
+                'diagnosticos_ingreso' => $normalize3($data['diagnosticos_ingreso'] ?? []),
+                'diagnosticos_alta' => $normalize3($data['diagnosticos_alta'] ?? []),
+            ]);
+
+            $form->estado = 'borrador';
+
+            // si este paso ahora cubre 12 y 13 del PDF, igual sigue siendo el paso 11 del wizard
+            if ($form->paso_actual < 12) {
+                $form->paso_actual = 12;
+            }
+
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Diagnósticos guardados (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 12,
+            ])->with('success', 'Diagnósticos guardados. Continúa al paso 12.');
+        }
+
+
+        if ($paso === 12) {
+
+            $data = $request->validate([
+                'plan_tratamiento' => ['nullable', 'array'],
+                'plan_tratamiento.*.indicaciones' => ['nullable', 'string', 'max:2000'],
+                'plan_tratamiento.*.medicamento' => ['nullable', 'string', 'max:255'],
+                'plan_tratamiento.*.posologia' => ['nullable', 'string', 'max:255'],
+            ]);
+
+            $rows = $data['plan_tratamiento'] ?? [];
+
+            $normalized = [];
+            for ($i = 1; $i <= 4; $i++) {
+                $indic = trim((string)($rows[$i]['indicaciones'] ?? ''));
+                $med = trim((string)($rows[$i]['medicamento'] ?? ''));
+                $pos = trim((string)($rows[$i]['posologia'] ?? ''));
+
+                $normalized[$i] = [
+                    'n' => $i,
+                    'indicaciones' => $indic !== '' ? $indic : null,
+                    'medicamento' => $med !== '' ? $med : null,
+                    'posologia' => $pos !== '' ? $pos : null,
+                ];
+            }
+
+            $form->fill([
+                'plan_tratamiento' => $normalized,
+            ]);
+
+            $form->estado = 'borrador';
+
+            if ($form->paso_actual < 13) {
+                $form->paso_actual = 13;
+            }
+
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Plan de tratamiento guardado (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 13,
+            ])->with('success', 'Plan de tratamiento guardado. Continúa al paso 13.');
+        }
+
+        if ($paso === 13) { // <-- ajusta si tu último paso es otro
+
+            $data = $request->validate([
+                'alta_destino' => ['required', 'in:domicilio,consulta_externa,observacion,internacion,referencia'],
+
+                'alta_servicio_referencia' => ['nullable', 'string', 'max:255'],
+                'alta_establecimiento_referencia' => ['nullable', 'string', 'max:255'],
+
+                'alta_resultado' => ['required', 'in:vivo,muerto_emergencia'],
+                'alta_condicion' => ['nullable', 'in:estable,inestable'],
+                'alta_causa' => ['nullable', 'string', 'max:255'],
+
+                'alta_dias_incapacidad' => ['nullable', 'integer', 'min:0', 'max:365'],
+
+                'alta_fecha_control' => ['nullable', 'date'],
+                'alta_hora_finalizacion' => ['nullable'], // la volvemos requerida al finalizar
+                'alta_profesional_codigo' => ['nullable', 'string', 'max:255'],
+                'alta_numero_hoja' => ['nullable', 'integer', 'min:1', 'max:999999'],
+            ]);
+
+            // Reglas condicionales
+            if (($data['alta_destino'] ?? null) === 'referencia') {
+                if (blank($data['alta_servicio_referencia'] ?? null)) {
+                    return back()->withErrors(['alta_servicio_referencia' => 'Requerido si es Referencia.'])->withInput();
+                }
+                if (blank($data['alta_establecimiento_referencia'] ?? null)) {
+                    return back()->withErrors(['alta_establecimiento_referencia' => 'Requerido si es Referencia.'])->withInput();
+                }
+            } else {
+                $data['alta_servicio_referencia'] = null;
+                $data['alta_establecimiento_referencia'] = null;
+            }
+
+            if (($data['alta_resultado'] ?? null) === 'vivo') {
+                if (blank($data['alta_condicion'] ?? null)) {
+                    return back()->withErrors(['alta_condicion' => 'Selecciona condición (estable/inestable).'])->withInput();
+                }
+                $data['alta_causa'] = null; // causa se usa para muerto (recomendado)
+            } else { // muerto_emergencia
+                $data['alta_condicion'] = null;
+                $data['alta_dias_incapacidad'] = null;
+                $data['alta_fecha_control'] = null;
+
+                if (blank($data['alta_causa'] ?? null)) {
+                    return back()->withErrors(['alta_causa' => 'Indica causa (requerida si es Muerto en emergencia).'])->withInput();
+                }
+            }
+
+            $accion = $request->input('accion', 'finish'); // save | finish
+
+            // Si FINALIZA, aquí sí pones obligatorios:
+            if ($accion === 'finish') {
+                if (blank($data['alta_hora_finalizacion'] ?? null)) {
+                    return back()->withErrors(['alta_hora_finalizacion' => 'Requerido para finalizar el formulario.'])->withInput();
+                }
+                if (blank($data['alta_profesional_codigo'] ?? null)) {
+                    return back()->withErrors(['alta_profesional_codigo' => 'Requerido para finalizar el formulario.'])->withInput();
+                }
+            }
+
+            $form->fill($data);
+
+            if ($accion === 'finish') {
+                $form->estado = 'completo';
+                $form->paso_actual = max($form->paso_actual, 13); // último paso
+            } else {
+                $form->estado = 'borrador';
+                $form->paso_actual = max($form->paso_actual, 13);
+            }
+
+            $form->save();
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Alta guardada (borrador).');
+            }
+
+            return redirect()->route('medico.formularios')
+                ->with('success', 'Formulario 008 finalizado y marcado como COMPLETO.');
+        }
 
 
         // -------------------------
-        // OTROS PASOS (aún no)
+        // OTROS PASOS 
         // -------------------------
         return back()->with('warning', 'Este paso aún está en construcción.');
     }

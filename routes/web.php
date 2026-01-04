@@ -92,6 +92,14 @@ Route::get('/debug/db', function () {
         Route::post('/formularios/{formulario}/paso/{paso}', [MedicoController::class, 'guardarPaso'])
     ->name('formularios.paso.store');
 
+    // PDF (solo completos)
+Route::get('/formularios/{formulario}/pdf', [MedicoController::class, 'pdf'])
+    ->name('formularios.pdf');
+
+// Archivar (solo incompletos)
+Route::patch('/formularios/{formulario}/archivar', [MedicoController::class, 'archivar'])
+    ->name('formularios.archivar');
+
 
 
 

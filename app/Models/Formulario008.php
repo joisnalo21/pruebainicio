@@ -97,6 +97,52 @@ class Formulario008 extends Model
         // Paso 8 Lesiones
         'no_aplica_lesiones',
         'lesiones',
+
+        // Paso 9 (Sección 10 PDF): Emergencia obstétrica
+        'no_aplica_obstetrica',
+        'obst_gestas',
+        'obst_partos',
+        'obst_abortos',
+        'obst_cesareas',
+        'obst_fum',
+        'obst_semanas_gestacion',
+        'obst_movimiento_fetal',
+        'obst_frecuencia_fetal',
+        'obst_altura_uterina',
+        'obst_membranas_rotas',
+        'obst_tiempo_membranas_rotas',
+        'obst_presentacion',
+        'obst_dilatacion_cm',
+        'obst_borramiento_pct',
+        'obst_plano',
+        'obst_pelvis_util',
+        'obst_sangrado_vaginal',
+        'obst_contracciones',
+        'obst_texto',
+
+        // Solicitud de exámenes (Sección 11 PDF)
+        'no_aplica_examenes',
+        'examenes_solicitados',
+        'examenes_comentarios',
+
+        'diagnosticos_ingreso',
+        'diagnosticos_alta',
+        'plan_tratamiento',
+
+        'alta_destino',
+        'alta_servicio_referencia',
+        'alta_establecimiento_referencia',
+        'alta_resultado',
+        'alta_condicion',
+        'alta_causa',
+        'alta_dias_incapacidad',
+        'alta_fecha_control',
+        'alta_hora_finalizacion',
+        'alta_profesional_codigo',
+        'alta_numero_hoja',
+
+
+
     ];
 
     /**
@@ -152,6 +198,20 @@ class Formulario008 extends Model
         'examen_fisico_checks' => 'array',
         'no_aplica_lesiones' => 'boolean',
         'lesiones' => 'array',
+        // Obstétrica
+        'no_aplica_obstetrica' => 'boolean',
+        'obst_membranas_rotas' => 'boolean',
+        'obst_sangrado_vaginal' => 'boolean',
+        'obst_contracciones' => 'boolean',
+        'obst_fum' => 'date',
+
+        'no_aplica_examenes' => 'boolean',
+        'examenes_solicitados' => 'array',
+
+        'diagnosticos_ingreso' => 'array',
+        'diagnosticos_alta' => 'array',
+        'plan_tratamiento' => 'array',
+        'alta_fecha_control' => 'date',
 
 
     ];

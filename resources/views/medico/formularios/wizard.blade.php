@@ -96,6 +96,21 @@
                     @elseif($paso === 8)
                     @include('medico.formularios.wizard_steps.paso8_lesiones')
 
+                    @elseif($paso === 9)
+                    @include('medico.formularios.wizard_steps.paso9_emergencia_obstetrica')
+
+                    @elseif($paso === 10)
+                    @include('medico.formularios.wizard_steps.paso10_solicitud_examenes')
+
+                    @elseif($paso === 11)
+                    @include('medico.formularios.wizard_steps.paso11_diagnostico_ingreso')
+
+                    @elseif($paso === 12)
+                    @include('medico.formularios.wizard_steps.paso12_plan_tratamiento')
+
+                    @elseif($paso === 13)
+                    @include('medico.formularios.wizard_steps.paso13_alta')
+
                     @else
                     <div class="text-gray-700">
                         <div class="font-semibold text-lg mb-2">
