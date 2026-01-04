@@ -100,6 +100,8 @@ Route::get('/formularios/{formulario}/pdf', [MedicoController::class, 'pdf'])
 Route::patch('/formularios/{formulario}/archivar', [MedicoController::class, 'archivar'])
     ->name('formularios.archivar');
 
+Route::patch('/formularios/{formulario}/desarchivar', [MedicoController::class, 'desarchivar'])
+  ->name('formularios.desarchivar');
 
 
 

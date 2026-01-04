@@ -12,6 +12,7 @@ class Formulario008 extends Model
     protected $table = 'formularios008';
 
     protected $fillable = [
+        'archivado_en' => 'datetime',
         'paciente_id',
         'created_by',
         'estado',
@@ -170,6 +171,13 @@ class Formulario008 extends Model
     {
         return $this->estado === 'completo';
     }
+
+    public function esArchivado(): bool
+    {
+        return $this->estado === 'archivado';
+    }
+
+
 
     /**
      * Casts

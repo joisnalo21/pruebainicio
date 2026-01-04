@@ -27,7 +27,7 @@ class MedicoController extends Controller
     public function listarFormularios(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
-        $estado = $request->query('estado'); // completo | incompleto | null
+        $estado = $request->query('estado'); // completo | incompleto | archivado | null
         $desde = $request->query('desde');   // YYYY-MM-DD
         $hasta = $request->query('hasta');   // YYYY-MM-DD
 
@@ -35,6 +35,12 @@ class MedicoController extends Controller
             ->with(['paciente', 'creador'])
             ->latest();
 
+        // ✅ Por defecto: ocultar archivados
+        if ($estado === null || $estado === '') {
+            $query->where('estado', '!=', 'archivado');
+        }
+
+        // Búsqueda
         if ($q !== '') {
             $query->where(function ($sub) use ($q) {
                 $sub->whereHas('paciente', function ($p) use ($q) {
@@ -53,19 +59,21 @@ class MedicoController extends Controller
             });
         }
 
+        // Fechas
         if ($desde) {
             $query->whereDate('created_at', '>=', $desde);
         }
-
         if ($hasta) {
             $query->whereDate('created_at', '<=', $hasta);
         }
 
-        // PRO: completo/incompleto depende de estado
+        // ✅ Filtro por estado
         if ($estado === 'completo') {
             $query->where('estado', 'completo');
         } elseif ($estado === 'incompleto') {
             $query->where('estado', 'borrador');
+        } elseif ($estado === 'archivado') {
+            $query->where('estado', 'archivado');
         }
 
         $formularios = $query->paginate(12)->withQueryString();
@@ -74,11 +82,14 @@ class MedicoController extends Controller
         $hoy = Carbon::today();
         $inicioMes = Carbon::now()->startOfMonth();
 
+        // ✅ KPIs por defecto excluyen archivados (coherente con la bandeja)
+        $baseKpi = Formulario008::query()->where('estado', '!=', 'archivado');
+
         $stats = [
-            'hoy' => Formulario008::whereDate('created_at', $hoy)->count(),
-            'mes' => Formulario008::whereDate('created_at', '>=', $inicioMes)->count(),
-            'pendientes' => Formulario008::where('estado', 'borrador')->count(),
-            'trauma' => 0, // aún no calculamos por tipo
+            'hoy'        => (clone $baseKpi)->whereDate('created_at', $hoy)->count(),
+            'mes'        => (clone $baseKpi)->whereDate('created_at', '>=', $inicioMes)->count(),
+            'pendientes' => Formulario008::where('estado', 'borrador')->count(), // NO incluye archivados
+            'trauma'     => 0,
         ];
 
         return view('medico.formularios.index', compact('formularios', 'stats', 'q', 'estado', 'desde', 'hasta'));
@@ -1148,5 +1159,44 @@ class MedicoController extends Controller
     {
         $formularios = Formulario008::with('paciente')->get();
         return view('medico.reportes.index', compact('formularios'));
+    }
+    public function archivar(Formulario008 $formulario)
+    {
+        if ($formulario->estado === 'completo') {
+            return back()->with('error', 'No se puede archivar un formulario completo.');
+        }
+
+        $formulario->estado = 'archivado';
+        $formulario->archivado_en = now();
+        $formulario->save();
+
+        return back()->with('success', 'Formulario archivado.');
+    }
+
+    public function desarchivar(Formulario008 $formulario)
+    {
+        if ($formulario->estado !== 'archivado') {
+            return back()->with('error', 'Este formulario no está archivado.');
+        }
+
+        $formulario->estado = 'borrador';
+        $formulario->archivado_en = null;
+        $formulario->save();
+
+        return back()->with('success', 'Formulario restaurado a borrador.');
+    }
+
+
+
+    public function pdf(Formulario008 $formulario)
+    {
+        if ($formulario->estado !== 'completo') {
+            abort(403, 'Solo se puede generar PDF de formularios completos.');
+        }
+
+        // TODO: aquí generas el PDF real.
+        // return Pdf::loadView('pdf.formulario008', compact('formulario'))->download(...);
+
+        return back()->with('error', 'PDF aún no implementado.');
     }
 }

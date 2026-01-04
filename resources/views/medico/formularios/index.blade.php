@@ -13,12 +13,12 @@
                 {{-- NUEVO BOTÓN --}}
                 <a href="{{ route('medico.formularios.nuevo') }}"
                     class="inline-flex items-center px-4 py-2 bg-blue-600 border border-blue-700 rounded-md font-semibold text-sm text-white hover:bg-blue-700">
-                    ➕ Nuevo Formulario 008
+                     Nuevo Formulario 008
                 </a>
 
                 <a href="{{ route('medico.pacientes.index') }}"
                     class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-md font-semibold text-sm text-gray-700 hover:bg-gray-50">
-                    🧍‍♂️ Pacientes
+                     Pacientes
                 </a>
             </div>
         </div>
@@ -73,6 +73,8 @@
                             <option value="" {{ $estado === null || $estado === '' ? 'selected' : '' }}>Todos</option>
                             <option value="completo" {{ $estado === 'completo' ? 'selected' : '' }}>Completos</option>
                             <option value="incompleto" {{ $estado === 'incompleto' ? 'selected' : '' }}>Incompletos</option>
+                            <option value="archivado" {{ $estado === 'archivado' ? 'selected' : '' }}>Archivados</option>
+
                         </select>
                     </div>
 
@@ -146,10 +148,14 @@
                                 </td>
 
                                 <td class="px-5 py-4">
-                                    @if(($form->estado ?? null) === 'completo')
+                                    @if($form->esCompleto())
 
                                     <span class="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
                                         Completo
+                                    </span>
+                                    @elseif($form->esArchivado())
+                                    <span class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                        Archivado
                                     </span>
                                     @else
                                     <span class="inline-flex items-center gap-2 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
@@ -161,34 +167,34 @@
                                 <td class="px-5 py-4 text-right">
                                     <div class="flex justify-end gap-2">
 
-                                        {{-- CONTINUAR (solo incompletos) --}}
-                                        @if(($form->estado ?? null) !== 'completo')
-                                        <a href="{{ route('medico.formularios.paso', ['formulario' => $form->id, 'paso' => $form->paso_actual ?? 1]) }}"
+                                        {{-- CONTINUAR (solo borrador o archivado) --}}
+                                        @if($form->esBorrador() || $form->esArchivado())
+                                        <a href="{{ route('medico.formularios.paso', ['formulario' => $form->id, 'paso' => $form->paso_actual]) }}"
                                             class="bg-gray-900 hover:bg-black text-white px-3 py-2 rounded-lg text-sm font-semibold">
                                             Continuar
                                         </a>
                                         @endif
 
                                         {{-- VER (solo completos) --}}
-                                        @if(($form->estado ?? null) === 'completo')
-                                        <a href="{{ route('medico.formularios.paso', ['formulario' => $form->id, 'paso' => 1]) }}"
+                                        @if($form->esCompleto())
+                                        <a href="{{ route('medico.formularios.paso', ['formulario' => $form->id, 'paso' => 13]) }}"
                                             class="bg-white hover:bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-semibold">
                                             Ver
                                         </a>
                                         @endif
 
                                         {{-- PDF (solo completos) --}}
-                                        @if(($form->estado ?? null) === 'completo')
+                                        @if($form->esCompleto())
                                         <a href="{{ route('medico.formularios.pdf', $form->id) }}"
                                             class="bg-white hover:bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-semibold">
                                             PDF
                                         </a>
                                         @endif
 
-                                        {{-- ARCHIVAR (solo incompletos) --}}
-                                        @if(($form->estado ?? null) !== 'completo')
+                                        {{-- ARCHIVAR (solo borradores) --}}
+                                        @if($form->esBorrador())
                                         <form method="POST" action="{{ route('medico.formularios.archivar', $form->id) }}"
-                                            onsubmit="return confirm('¿Archivar este formulario incompleto?');">
+                                            onsubmit="return confirm('¿Archivar este formulario incompleto? Se ocultará del listado principal.');">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit"
@@ -198,8 +204,22 @@
                                         </form>
                                         @endif
 
+                                        {{-- DESARCHIVAR (solo archivados) --}}
+                                        @if($form->esArchivado())
+                                        <form method="POST" action="{{ route('medico.formularios.desarchivar', $form->id) }}"
+                                            onsubmit="return confirm('¿Desarchivar y volver a mostrar en el listado principal?');">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit"
+                                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-semibold">
+                                                Desarchivar
+                                            </button>
+                                        </form>
+                                        @endif
+
                                     </div>
                                 </td>
+
 
 
 
