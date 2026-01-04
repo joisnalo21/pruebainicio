@@ -39,17 +39,17 @@ class MedicoController extends Controller
             $query->where(function ($sub) use ($q) {
                 $sub->whereHas('paciente', function ($p) use ($q) {
                     $p->where('cedula', 'like', "%{$q}%")
-                      ->orWhere('primer_nombre', 'like', "%{$q}%")
-                      ->orWhere('segundo_nombre', 'like', "%{$q}%")
-                      ->orWhere('apellido_paterno', 'like', "%{$q}%")
-                      ->orWhere('apellido_materno', 'like', "%{$q}%")
-                      ->orWhereRaw(
-                          "CONCAT_WS(' ', primer_nombre, segundo_nombre, apellido_paterno, apellido_materno) LIKE ?",
-                          ["%{$q}%"]
-                      );
+                        ->orWhere('primer_nombre', 'like', "%{$q}%")
+                        ->orWhere('segundo_nombre', 'like', "%{$q}%")
+                        ->orWhere('apellido_paterno', 'like', "%{$q}%")
+                        ->orWhere('apellido_materno', 'like', "%{$q}%")
+                        ->orWhereRaw(
+                            "CONCAT_WS(' ', primer_nombre, segundo_nombre, apellido_paterno, apellido_materno) LIKE ?",
+                            ["%{$q}%"]
+                        );
                 })
-                ->orWhere('id', $q)
-                ->orWhereRaw("CONCAT('008-', LPAD(id, 6, '0')) LIKE ?", ["%{$q}%"]);
+                    ->orWhere('id', $q)
+                    ->orWhereRaw("CONCAT('008-', LPAD(id, 6, '0')) LIKE ?", ["%{$q}%"]);
             });
         }
 
@@ -162,14 +162,16 @@ class MedicoController extends Controller
             $h = config('form008.hospital', []);
 
             $dirty = false;
-            foreach ([
-                'institucion_sistema' => $h['institucion_sistema'] ?? null,
-                'unidad_operativa' => $h['unidad_operativa'] ?? null,
-                'cod_uo' => $h['cod_uo'] ?? null,
-                'cod_provincia' => $h['cod_provincia'] ?? null,
-                'cod_canton' => $h['cod_canton'] ?? null,
-                'cod_parroquia' => $h['cod_parroquia'] ?? null,
-            ] as $k => $v) {
+            foreach (
+                [
+                    'institucion_sistema' => $h['institucion_sistema'] ?? null,
+                    'unidad_operativa' => $h['unidad_operativa'] ?? null,
+                    'cod_uo' => $h['cod_uo'] ?? null,
+                    'cod_provincia' => $h['cod_provincia'] ?? null,
+                    'cod_canton' => $h['cod_canton'] ?? null,
+                    'cod_parroquia' => $h['cod_parroquia'] ?? null,
+                ] as $k => $v
+            ) {
                 if (blank($form->{$k}) && !blank($v)) {
                     $form->{$k} = $v;
                     $dirty = true;
@@ -249,10 +251,30 @@ class MedicoController extends Controller
         if ($paso === 2) {
 
             $allowedTipos = [
-                'accidente_transito','caida','quemadura','mordedura','ahogamiento','cuerpo_extrano','aplastamiento','otro_accidente',
-                'violencia_arma_fuego','violencia_arma_punzante','violencia_rina','violencia_familiar','abuso_fisico','abuso_psicologico','abuso_sexual','otra_violencia',
-                'intoxicacion_alcoholica','intoxicacion_alimentaria','intoxicacion_drogas','inhalacion_gases','otra_intoxicacion',
-                'envenenamiento','picadura','anafilaxia',
+                'accidente_transito',
+                'caida',
+                'quemadura',
+                'mordedura',
+                'ahogamiento',
+                'cuerpo_extrano',
+                'aplastamiento',
+                'otro_accidente',
+                'violencia_arma_fuego',
+                'violencia_arma_punzante',
+                'violencia_rina',
+                'violencia_familiar',
+                'abuso_fisico',
+                'abuso_psicologico',
+                'abuso_sexual',
+                'otra_violencia',
+                'intoxicacion_alcoholica',
+                'intoxicacion_alimentaria',
+                'intoxicacion_drogas',
+                'inhalacion_gases',
+                'otra_intoxicacion',
+                'envenenamiento',
+                'picadura',
+                'anafilaxia',
             ];
 
             $data = $request->validate([
@@ -268,8 +290,8 @@ class MedicoController extends Controller
                 'evento_tipos' => ['nullable', 'array'],
                 'evento_tipos.*' => ['in:' . implode(',', $allowedTipos)],
 
-               'custodia_policial' => ['nullable', 'boolean'],
-'no_aplica_apartado_3' => ['nullable', 'boolean'],
+                'custodia_policial' => ['nullable', 'boolean'],
+                'no_aplica_apartado_3' => ['nullable', 'boolean'],
                 'evento_observaciones' => ['nullable', 'string'],
 
                 'aliento_etilico' => ['nullable', 'boolean'],
@@ -287,21 +309,21 @@ class MedicoController extends Controller
 
             $data['notificacion_policia'] = (bool) $request->boolean('notificacion_policia');
             $data['custodia_policial'] = (bool) $request->boolean('custodia_policial');
-$data['no_aplica_apartado_3'] = (bool) $request->boolean('no_aplica_apartado_3');
+            $data['no_aplica_apartado_3'] = (bool) $request->boolean('no_aplica_apartado_3');
             $data['aliento_etilico'] = (bool) $request->boolean('aliento_etilico');
 
 
 
-if ($data['no_aplica_apartado_3']) {
-    $data['evento_fecha_hora'] = null;
-    $data['evento_lugar'] = null;
-    $data['evento_direccion'] = null;
-    $data['evento_tipos'] = null;
-    $data['custodia_policial'] = false;
-    $data['aliento_etilico'] = false;
-    $data['valor_alcochek'] = null;
-    $data['evento_observaciones'] = null;
-}
+            if ($data['no_aplica_apartado_3']) {
+                $data['evento_fecha_hora'] = null;
+                $data['evento_lugar'] = null;
+                $data['evento_direccion'] = null;
+                $data['evento_tipos'] = null;
+                $data['custodia_policial'] = false;
+                $data['aliento_etilico'] = false;
+                $data['valor_alcochek'] = null;
+                $data['evento_observaciones'] = null;
+            }
 
 
             $form->fill($data);
@@ -326,6 +348,451 @@ if ($data['no_aplica_apartado_3']) {
                 'paso' => 3,
             ])->with('success', 'Paso 2 guardado. Continúa al paso 3.');
         }
+        if ($paso === 3) {
+
+            $allowedTipos = [
+                'alergico',
+                'clinico',
+                'ginecologico',
+                'traumatologico',
+                'quirurgico',
+                'farmacologico',
+                'otro',
+            ];
+
+            $data = $request->validate([
+                'antecedentes_no_aplica' => ['nullable', 'boolean'],
+                'antecedentes_tipos' => ['nullable', 'array'],
+                'antecedentes_tipos.*' => ['in:' . implode(',', $allowedTipos)],
+                'antecedentes_otro_texto' => ['nullable', 'string', 'max:100'],
+                'antecedentes_detalle' => ['nullable', 'string'],
+            ]);
+
+            $data['antecedentes_no_aplica'] = (bool) $request->boolean('antecedentes_no_aplica');
+
+            // Si NO aplica: limpiar todo
+            if ($data['antecedentes_no_aplica']) {
+                $data['antecedentes_tipos'] = null;
+                $data['antecedentes_otro_texto'] = null;
+                $data['antecedentes_detalle'] = null;
+            } else {
+                // Si marcaron "otro", exigir texto
+                $tipos = $data['antecedentes_tipos'] ?? [];
+                if (in_array('otro', $tipos, true) && blank($data['antecedentes_otro_texto'] ?? null)) {
+                    return back()
+                        ->withErrors(['antecedentes_otro_texto' => 'Especifique el antecedente en “Otro”.'])
+                        ->withInput();
+                }
+            }
+
+            $form->fill($data);
+            $form->estado = 'borrador';
+
+            if ($form->paso_actual < 4) {
+                $form->paso_actual = 4;
+            }
+
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Paso 3 guardado (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 4,
+            ])->with('success', 'Paso 3 guardado. Continúa al paso 4.');
+        }
+
+        if ($paso === 4) {
+
+            $data = $request->validate([
+                'no_aplica_enfermedad_actual' => ['nullable', 'boolean'],
+
+                'via_aerea' => ['nullable', 'in:libre,obstruida'],
+                'condicion' => ['nullable', 'in:estable,inestable'],
+                'enfermedad_actual_revision' => ['nullable', 'string'],
+            ]);
+
+            $data['no_aplica_enfermedad_actual'] = (bool) $request->boolean('no_aplica_enfermedad_actual');
+
+            if ($data['no_aplica_enfermedad_actual']) {
+                $data['via_aerea'] = null;
+                $data['condicion'] = null;
+                $data['enfermedad_actual_revision'] = null;
+            }
+
+            $form->fill($data);
+            $form->estado = 'borrador';
+
+            if ($form->paso_actual < 5) {
+                $form->paso_actual = 5;
+            }
+
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Paso 4 guardado (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 5,
+            ])->with('success', 'Paso 4 guardado. Continúa al paso 5.');
+        }
+        // -------------------------
+        // PASO 5: DOLOR (Sección 6 del formulario físico)
+        // -------------------------
+        if ($paso === 5) {
+
+            $allowedSituacion = ['localizado', 'difuso', 'irradiado', 'referido'];
+            $allowedEvolucion = ['agudo', 'subagudo', 'cronico'];
+            $allowedTipo = ['episodico', 'continuo', 'colico'];
+
+            $allowedModifica = ['posicion', 'ingesta', 'esfuerzo', 'digito_presion'];
+            $allowedAlivia   = ['analgesico', 'anti_espasmodico', 'opiaceo', 'no_alivia'];
+
+            $data = $request->validate([
+                'no_aplica_dolor' => ['nullable', 'boolean'],
+
+                'dolor' => ['nullable', 'array'],
+                'dolor.*.region' => ['nullable', 'string', 'max:255'],
+                'dolor.*.punto' => ['nullable', 'string', 'max:255'],
+
+                'dolor.*.situacion' => ['nullable', 'in:' . implode(',', $allowedSituacion)],
+                'dolor.*.evolucion' => ['nullable', 'in:' . implode(',', $allowedEvolucion)],
+                'dolor.*.tipo' => ['nullable', 'in:' . implode(',', $allowedTipo)],
+
+                'dolor.*.se_modifica_con' => ['nullable', 'array'],
+                'dolor.*.se_modifica_con.*' => ['in:' . implode(',', $allowedModifica)],
+
+                'dolor.*.alivia_con' => ['nullable', 'array'],
+                'dolor.*.alivia_con.*' => ['in:' . implode(',', $allowedAlivia)],
+
+                'dolor.*.intensidad' => ['nullable', 'integer', 'min:0', 'max:10'],
+            ]);
+
+            $noAplica = (bool) $request->boolean('no_aplica_dolor');
+
+            if ($noAplica) {
+                $form->no_aplica_dolor = true;
+                $form->dolor_items = null;
+            } else {
+                $items = $data['dolor'] ?? [];
+
+                // elimina filas totalmente vacías
+                $items = array_values(array_filter($items, function ($it) {
+                    $hasAny =
+                        !blank($it['region'] ?? null) ||
+                        !blank($it['punto'] ?? null) ||
+                        !blank($it['situacion'] ?? null) ||
+                        !blank($it['evolucion'] ?? null) ||
+                        !blank($it['tipo'] ?? null) ||
+                        !empty($it['se_modifica_con'] ?? []) ||
+                        !empty($it['alivia_con'] ?? []) ||
+                        isset($it['intensidad']);
+                    return $hasAny;
+                }));
+
+                // regla mínima: si existe un dolor, región y punto deben estar
+                foreach ($items as $i => $it) {
+                    if (blank($it['region'] ?? null) || blank($it['punto'] ?? null)) {
+                        return back()
+                            ->withErrors(["dolor.$i.region" => "Región y punto doloroso son obligatorios si registras un dolor."])
+                            ->withInput();
+                    }
+                }
+
+                $form->no_aplica_dolor = false;
+                $form->dolor_items = $items;
+            }
+
+            $form->estado = 'borrador';
+            if ($form->paso_actual < 6) $form->paso_actual = 6; // después del paso 5
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Dolor guardado (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 6,
+            ])->with('success', 'Dolor guardado. Continúa al siguiente paso.');
+        }
+
+        if ($paso === 6) {
+            $data = $request->validate([
+                'pa_sistolica' => ['nullable', 'integer', 'min:0', 'max:300'],
+                'pa_diastolica' => ['nullable', 'integer', 'min:0', 'max:200'],
+
+                'frecuencia_cardiaca' => ['nullable', 'integer', 'min:0', 'max:250'],
+                'frecuencia_respiratoria' => ['nullable', 'integer', 'min:0', 'max:80'],
+
+                'temp_bucal' => ['nullable', 'numeric', 'min:30', 'max:45'],
+                'temp_axilar' => ['nullable', 'numeric', 'min:30', 'max:45'],
+
+                'peso' => ['nullable', 'numeric', 'min:0', 'max:500'],
+                'talla' => ['nullable', 'numeric', 'min:0', 'max:3'],
+
+                'saturacion_oxigeno' => ['nullable', 'integer', 'min:0', 'max:100'],
+                'tiempo_llenado_capilar' => ['nullable', 'numeric', 'min:0', 'max:10'],
+
+                'glasgow_ocular' => ['nullable', 'integer', 'min:1', 'max:4'],
+                'glasgow_verbal' => ['nullable', 'integer', 'min:1', 'max:5'],
+                'glasgow_motora' => ['nullable', 'integer', 'min:1', 'max:6'],
+
+                'reaccion_pupila_der' => ['nullable', 'string', 'max:30'],
+                'reaccion_pupila_izq' => ['nullable', 'string', 'max:30'],
+            ]);
+
+            // Calcular Glasgow total si hay valores
+            $o = $data['glasgow_ocular'] ?? null;
+            $v = $data['glasgow_verbal'] ?? null;
+            $m = $data['glasgow_motora'] ?? null;
+
+            if ($o && $v && $m) {
+                $data['glasgow_total'] = (int)$o + (int)$v + (int)$m;
+            } else {
+                $data['glasgow_total'] = null;
+            }
+
+            $form->fill($data);
+            $form->estado = 'borrador';
+
+            if ($form->paso_actual < 7) $form->paso_actual = 7; // el siguiente paso
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+            if ($accion === 'save') return back()->with('success', 'Paso 6 guardado (borrador).');
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 7,
+            ])->with('success', 'Paso 6 guardado. Continúa al paso 7.');
+        }
+        if ($paso === 6) {
+            $data = $request->validate([
+                'pa_sistolica' => ['nullable', 'integer', 'min:0', 'max:300'],
+                'pa_diastolica' => ['nullable', 'integer', 'min:0', 'max:200'],
+
+                'frecuencia_cardiaca' => ['nullable', 'integer', 'min:0', 'max:250'],
+                'frecuencia_respiratoria' => ['nullable', 'integer', 'min:0', 'max:80'],
+
+                'temp_bucal' => ['nullable', 'numeric', 'min:30', 'max:45'],
+                'temp_axilar' => ['nullable', 'numeric', 'min:30', 'max:45'],
+
+                'peso' => ['nullable', 'numeric', 'min:0', 'max:500'],
+                'talla' => ['nullable', 'numeric', 'min:0', 'max:3'],
+
+                'saturacion_oxigeno' => ['nullable', 'integer', 'min:0', 'max:100'],
+                'tiempo_llenado_capilar' => ['nullable', 'numeric', 'min:0', 'max:10'],
+
+                'glasgow_ocular' => ['nullable', 'integer', 'min:1', 'max:4'],
+                'glasgow_verbal' => ['nullable', 'integer', 'min:1', 'max:5'],
+                'glasgow_motora' => ['nullable', 'integer', 'min:1', 'max:6'],
+
+                'reaccion_pupila_der' => ['nullable', 'string', 'max:30'],
+                'reaccion_pupila_izq' => ['nullable', 'string', 'max:30'],
+            ]);
+
+            // Calcular Glasgow total si hay valores
+            $o = $data['glasgow_ocular'] ?? null;
+            $v = $data['glasgow_verbal'] ?? null;
+            $m = $data['glasgow_motora'] ?? null;
+
+            if ($o && $v && $m) {
+                $data['glasgow_total'] = (int)$o + (int)$v + (int)$m;
+            } else {
+                $data['glasgow_total'] = null;
+            }
+
+            $form->fill($data);
+            $form->estado = 'borrador';
+
+            if ($form->paso_actual < 7) $form->paso_actual = 7; // el siguiente paso
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+            if ($accion === 'save') return back()->with('success', 'Paso 6 guardado (borrador).');
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 7,
+            ])->with('success', 'Paso 6 guardado. Continúa al paso 7.');
+        }
+
+
+        // -------------------------
+        // PASO 7: EXAMEN FÍSICO (Sección 8 PDF)
+        // -------------------------
+        if ($paso === 7) {
+
+            $items = [
+                // Regional (R)
+                '1-R' => 'Piel – Faneras',
+                '2-R' => 'Cabeza',
+                '3-R' => 'Ojos',
+                '4-R' => 'Oídos',
+                '5-R' => 'Nariz',
+                '6-R' => 'Boca',
+                '7-R' => 'Oro faringe',
+                '8-R' => 'Cuello',
+                '9-R' => 'Axilas – Mamas',
+                '10-R' => 'Tórax',
+                '11-R' => 'Abdomen',
+                '12-R' => 'Columna vertebral',
+                '13-R' => 'Ingle – Periné',
+                '14-R' => 'Miembros superiores',
+                '15-R' => 'Miembros inferiores',
+
+                // Sistémico (S)
+                '1-S' => 'Órganos de los sentidos',
+                '2-S' => 'Respiratorio',
+                '3-S' => 'Cardio vascular',
+                '4-S' => 'Digestivo',
+                '5-S' => 'Genital',
+                '6-S' => 'Urinario',
+                '7-S' => 'Músculo esquelético',
+                '8-S' => 'Endocrino',
+                '9-S' => 'Hemo linfático',
+                '10-S' => 'Neurológico',
+            ];
+
+            $data = $request->validate([
+                'examen_fisico_checks' => ['nullable', 'array'],
+                'examen_fisico_checks.*' => ['nullable', 'in:SP,CP'],
+                'examen_fisico_descripcion' => ['nullable', 'string', 'max:5000'],
+            ]);
+
+            $accion = $request->input('accion', 'next');
+
+            // Normaliza y filtra solo claves permitidas
+            $allowedKeys = array_keys($items);
+            $checks = $data['examen_fisico_checks'] ?? [];
+            if (!is_array($checks)) $checks = [];
+
+            $checks = array_intersect_key($checks, array_flip($allowedKeys));
+            $checks = array_filter($checks, fn($v) => in_array($v, ['SP', 'CP'], true));
+
+            // Si "Guardar y continuar" => exigir que TODOS estén seleccionados
+            if ($accion === 'next' && count($checks) !== count($allowedKeys)) {
+                return back()
+                    ->withErrors(['examen_fisico_checks' => 'Debes marcar SP o CP en todos los ítems del examen físico.'])
+                    ->withInput();
+            }
+
+            // Si hay CP y se quiere avanzar => exigir descripción
+            $hayCP = in_array('CP', $checks, true);
+            $desc = trim((string)($data['examen_fisico_descripcion'] ?? ''));
+
+            if ($accion === 'next' && $hayCP && mb_strlen($desc) < 10) {
+                return back()
+                    ->withErrors(['examen_fisico_descripcion' => 'Marcaste CP en uno o más ítems. Describe los hallazgos (mínimo 10 caracteres).'])
+                    ->withInput();
+            }
+
+            $form->examen_fisico_checks = $checks;
+            $form->examen_fisico_descripcion = $desc !== '' ? $desc : null;
+
+            $form->estado = 'borrador';
+
+            // Avanza paso_actual si corresponde (paso 7 => habilita paso 8)
+            if ($form->paso_actual < 8) {
+                $form->paso_actual = 8;
+            }
+
+            $form->save();
+
+            if ($accion === 'save') {
+                return back()->with('success', 'Paso 7 guardado (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 8,
+            ])->with('success', 'Paso 7 guardado. Continúa al paso 8.');
+        }
+
+
+
+        // -------------------------
+        // PASO 8: LOCALIZACIÓN DE LESIONES (PDF #9)
+        // -------------------------
+        if ($paso === 8) {
+
+            $data = $request->validate([
+                'no_aplica_lesiones' => ['nullable', 'boolean'],
+                'lesiones' => ['nullable', 'string'], // JSON string
+            ]);
+
+            $noAplica = (bool) $request->boolean('no_aplica_lesiones');
+
+            $lesiones = [];
+            if (!$noAplica) {
+                $raw = (string) ($request->input('lesiones', ''));
+
+                if ($raw !== '') {
+                    $decoded = json_decode($raw, true);
+
+                    if (!is_array($decoded)) {
+                        return back()->withErrors(['lesiones' => 'Formato inválido de lesiones.'])->withInput();
+                    }
+
+                    // Validación manual simple (pro)
+                    foreach ($decoded as $i => $p) {
+                        $view = $p['view'] ?? null;
+                        $x    = $p['x'] ?? null;
+                        $y    = $p['y'] ?? null;
+                        $tipo = $p['tipo'] ?? null;
+
+                        if (!in_array($view, ['front', 'back'], true)) {
+                            return back()->withErrors(['lesiones' => "Lesión #" . ($i + 1) . ": vista inválida."])->withInput();
+                        }
+                        if (!is_numeric($x) || $x < 0 || $x > 1 || !is_numeric($y) || $y < 0 || $y > 1) {
+                            return back()->withErrors(['lesiones' => "Lesión #" . ($i + 1) . ": coordenadas inválidas."])->withInput();
+                        }
+                        if (!is_numeric($tipo) || (int)$tipo < 1 || (int)$tipo > 14) {
+                            return back()->withErrors(['lesiones' => "Lesión #" . ($i + 1) . ": tipo inválido (1-14)."])->withInput();
+                        }
+
+                        $lesiones[] = [
+                            'view' => $view,
+                            'x'    => (float) $x,
+                            'y'    => (float) $y,
+                            'tipo' => (int) $tipo,
+                        ];
+                    }
+                }
+            }
+
+            $form->no_aplica_lesiones = $noAplica;
+            $form->lesiones = $noAplica ? [] : $lesiones;
+
+            $form->estado = 'borrador';
+            if ($form->paso_actual < 9) $form->paso_actual = 9;
+
+            $form->save();
+
+            $accion = $request->input('accion', 'next');
+            if ($accion === 'save') {
+                return back()->with('success', 'Paso guardado (borrador).');
+            }
+
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => 9,
+            ])->with('success', 'Guardado. Continúa al siguiente paso.');
+        }
+
+
+
 
         // -------------------------
         // OTROS PASOS (aún no)

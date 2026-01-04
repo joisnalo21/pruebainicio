@@ -53,6 +53,50 @@ class Formulario008 extends Model
         'evento_observaciones',
         'aliento_etilico',
         'valor_alcochek',
+
+
+        //Paso 3 (Antecedentes)
+        'antecedentes_no_aplica',
+        'antecedentes_tipos',
+        'antecedentes_otro_texto',
+        'antecedentes_detalle',
+
+        // Paso 4 (Enfermedad actual)
+        'no_aplica_enfermedad_actual',
+        'via_aerea',
+        'condicion',
+        'enfermedad_actual_revision',
+
+        // Paso 5 Dolor
+        'no_aplica_dolor',
+        'dolor_items',
+
+        // Paso 6  signos vitales
+        // Paso 6 - Signos vitales
+        'pa_sistolica',
+        'pa_diastolica',
+        'frecuencia_cardiaca',
+        'frecuencia_respiratoria',
+        'temp_bucal',
+        'temp_axilar',
+        'peso',
+        'talla',
+        'saturacion_oxigeno',
+        'tiempo_llenado_capilar',
+        'glasgow_ocular',
+        'glasgow_verbal',
+        'glasgow_motora',
+        'glasgow_total',
+        'reaccion_pupila_der',
+        'reaccion_pupila_izq',
+
+        // Paso 7 Examen físico
+        'examen_fisico_checks',
+        'examen_fisico_descripcion',
+
+        // Paso 8 Lesiones
+        'no_aplica_lesiones',
+        'lesiones',
     ];
 
     /**
@@ -95,5 +139,20 @@ class Formulario008 extends Model
 
         'aliento_etilico' => 'boolean',
         'evento_fecha_hora' => 'datetime',
+        'antecedentes_no_aplica' => 'boolean',
+        'antecedentes_tipos' => 'array',
+        'no_aplica_enfermedad_actual' => 'boolean',
+        'no_aplica_dolor' => 'boolean',
+        'dolor_items' => 'array',
+        'temp_bucal' => 'decimal:1',
+        'temp_axilar' => 'decimal:1',
+        'peso' => 'decimal:2',
+        'talla' => 'decimal:2',
+        'tiempo_llenado_capilar' => 'decimal:1',
+        'examen_fisico_checks' => 'array',
+        'no_aplica_lesiones' => 'boolean',
+        'lesiones' => 'array',
+
+
     ];
 }
