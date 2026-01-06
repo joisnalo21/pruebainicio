@@ -163,6 +163,15 @@ class MedicoController extends Controller
             abort(403);
         }
 
+        /////////////////////////////////////////////////////////////
+        if ($form->esCompleto()) {
+            return redirect()->route('medico.formularios.ver.paso', [
+                'formulario' => $form->id,
+                'paso' => $paso,
+            ]);
+        }
+
+
         // No permitir saltar pasos hacia adelante
         if ($paso > (int) $form->paso_actual) {
             return redirect()->route('medico.formularios.paso', [
@@ -217,6 +226,7 @@ class MedicoController extends Controller
 
         if ((int) $form->created_by !== (int) Auth::id()) {
             abort(403);
+            abort_if($form->esCompleto(), 403, 'Este formulario está completo y es de solo lectura.');
         }
 
         // -------------------------
@@ -1203,6 +1213,36 @@ class MedicoController extends Controller
         return response($bytes, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => "inline; filename=\"{$filename}\"",
+        ]);
+    }
+
+    public function verPaso(Request $request, Formulario008 $formulario, $paso)
+    {
+        $paso = (int) $paso;
+
+        $steps = config('form008.wizard', []);
+        if ($paso < 1 || empty($steps) || !isset($steps[$paso])) {
+            abort(404);
+        }
+
+        $form = $formulario->load(['paciente', 'creador']);
+
+        if ((int) $form->created_by !== (int) Auth::id()) {
+            abort(403);
+        }
+
+        // Solo permitimos completos
+        if (!$form->esCompleto()) {
+            return redirect()->route('medico.formularios.paso', [
+                'formulario' => $form->id,
+                'paso' => $form->paso_actual,
+            ])->with('success', 'Este formulario aún está incompleto. Continúa editando.');
+        }
+
+        return view('medico.formularios.wizard_readonly', [
+            'formulario' => $form,
+            'paso' => $paso,
+            'steps' => $steps,
         ]);
     }
 }

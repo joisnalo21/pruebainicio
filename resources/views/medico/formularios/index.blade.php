@@ -13,12 +13,12 @@
                 {{-- NUEVO BOTÓN --}}
                 <a href="{{ route('medico.formularios.nuevo') }}"
                     class="inline-flex items-center px-4 py-2 bg-blue-600 border border-blue-700 rounded-md font-semibold text-sm text-white hover:bg-blue-700">
-                     Nuevo Formulario 008
+                    Nuevo Formulario 008
                 </a>
 
                 <a href="{{ route('medico.pacientes.index') }}"
                     class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-md font-semibold text-sm text-gray-700 hover:bg-gray-50">
-                     Pacientes
+                    Pacientes
                 </a>
             </div>
         </div>
@@ -93,7 +93,7 @@
                     <div class="md:col-span-1 flex gap-2">
                         <button type="submit"
                             class="w-full bg-gray-900 hover:bg-black text-white px-4 py-2 rounded-lg font-semibold">
-                            🔎
+                            Buscar
                         </button>
                     </div>
                 </form>
@@ -177,7 +177,7 @@
 
                                         {{-- VER (solo completos) --}}
                                         @if($form->esCompleto())
-                                        <a href="{{ route('medico.formularios.paso', ['formulario' => $form->id, 'paso' => 13]) }}"
+                                        <a href="{{ route('medico.formularios.ver.paso', ['formulario' => $form->id, 'paso' => 13]) }}"
                                             class="bg-white hover:bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-semibold">
                                             Ver
                                         </a>
@@ -186,10 +186,13 @@
                                         {{-- PDF (solo completos) --}}
                                         @if($form->esCompleto())
                                         <a href="{{ route('medico.formularios.pdf', $form->id) }}"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                             class="bg-white hover:bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-semibold">
                                             PDF
                                         </a>
                                         @endif
+
 
                                         {{-- ARCHIVAR (solo borradores) --}}
                                         @if($form->esBorrador())

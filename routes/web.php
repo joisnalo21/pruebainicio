@@ -105,6 +105,10 @@ Route::middleware(['auth', 'role:medico'])
             ->name('formularios.desarchivar');
 
 
+        // Vista SOLO LECTURA (solo completos)
+        Route::get('/formularios/{formulario}/ver/paso/{paso}', [MedicoController::class, 'verPaso'])
+            ->whereNumber('paso')
+            ->name('formularios.ver.paso');
 
         // REPORTES
         Route::get('/reportes', [MedicoController::class, 'reportes'])->name('reportes');

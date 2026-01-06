@@ -12,7 +12,7 @@
     <div class="container mx-auto flex justify-between items-center px-6">
       <h1 class="text-xl font-semibold">Sistema Emergencias - MSP 008</h1>
       <div class="flex items-center space-x-4">
-        <p>👨‍⚕️ {{ Auth::user()->name }}</p>
+        <p>Bienvenido, {{ Auth::user()->name }}</p>
         <form method="POST" action="{{ route('logout') }}">
           @csrf
           <button type="submit" class="bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded">Salir</button>
@@ -40,9 +40,9 @@
     </div>
 
     <div class="flex gap-4">
-      <a href="{{ route('medico.pacientes.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow">🧍‍♂️ Gestionar Pacientes</a>
-      <a href="{{ route('medico.formularios') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow">📋 Formularios 008</a>
-      <a href="{{ route('medico.reportes') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-semibold shadow">📊 Reportes</a>
+      <a href="{{ route('medico.pacientes.index') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow"> Gestionar Pacientes</a>
+      <a href="{{ route('medico.formularios') }}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow"> Formularios 008</a>
+      <a href="{{ route('medico.reportes') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-semibold shadow"> Reportes</a>
     </div>
   </main>
 </body>

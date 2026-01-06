@@ -3,7 +3,7 @@
         <!-- Encabezado -->
         <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-3">
             <h2 class="text-2xl font-semibold text-blue-700 flex items-center gap-2">
-                👥 Gestión de Pacientes
+                 Gestión de Pacientes
             </h2>
             <a href="{{ route('medico.pacientes.create') }}"
                class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
