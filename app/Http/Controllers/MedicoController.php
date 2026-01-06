@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
 use App\Models\Paciente;
 use App\Models\Formulario008;
+use App\Services\Formulario008PdfService;
+
 
 class MedicoController extends Controller
 {
@@ -117,6 +119,7 @@ class MedicoController extends Controller
 
         return view('medico.formularios.seleccionar_paciente', compact('pacientes', 'q'));
     }
+
 
     // =========================
     // NUEVO 008 - CREAR BORRADOR
@@ -1188,15 +1191,18 @@ class MedicoController extends Controller
 
 
 
-    public function pdf(Formulario008 $formulario)
+    public function pdf(Formulario008 $formulario, Request $request, Formulario008PdfService $pdfService)
     {
-        if ($formulario->estado !== 'completo') {
-            abort(403, 'Solo se puede generar PDF de formularios completos.');
-        }
+        abort_unless($formulario->esCompleto(), 403, 'Solo se puede generar PDF cuando el formulario está completo.');
 
-        // TODO: aquí generas el PDF real.
-        // return Pdf::loadView('pdf.formulario008', compact('formulario'))->download(...);
+        $grid = $request->boolean('grid'); // modo ayuda para ubicar coordenadas
+        $bytes = $pdfService->render($formulario, $grid);
 
-        return back()->with('error', 'PDF aún no implementado.');
+        $filename = 'Formulario008-' . str_pad((string)$formulario->id, 6, '0', STR_PAD_LEFT) . '.pdf';
+
+        return response($bytes, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "inline; filename=\"{$filename}\"",
+        ]);
     }
 }

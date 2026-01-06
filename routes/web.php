@@ -15,7 +15,7 @@ Route::get('/', function () {
 });
 
 // Rutas de autenticación (Laravel Breeze)
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 // -------------------
 // RUTAS PROTEGIDAS POR ROL
@@ -31,14 +31,14 @@ Route::middleware(['auth', 'role:medico'])
     ->prefix('medico')
     ->name('medico.')
     ->group(function () {
-Route::get('/debug/db', function () {
-    return response()->json([
-        'database' => DB::select('select database() as db')[0]->db ?? null,
-        'server'   => DB::select('select @@hostname as host, @@port as port')[0] ?? null,
-        'has_no_aplica_apartado_3' => Schema::hasColumn('formularios008','no_aplica_apartado_3'),
-        'has_custodia_policial'    => Schema::hasColumn('formularios008','custodia_policial'),
-    ]);
-})->name('debug.db');
+        Route::get('/debug/db', function () {
+            return response()->json([
+                'database' => DB::select('select database() as db')[0]->db ?? null,
+                'server'   => DB::select('select @@hostname as host, @@port as port')[0] ?? null,
+                'has_no_aplica_apartado_3' => Schema::hasColumn('formularios008', 'no_aplica_apartado_3'),
+                'has_custodia_policial'    => Schema::hasColumn('formularios008', 'custodia_policial'),
+            ]);
+        })->name('debug.db');
 
 
 
@@ -90,18 +90,19 @@ Route::get('/debug/db', function () {
             ->name('formularios.paso');
 
         Route::post('/formularios/{formulario}/paso/{paso}', [MedicoController::class, 'guardarPaso'])
-    ->name('formularios.paso.store');
+            ->name('formularios.paso.store');
 
-    // PDF (solo completos)
-Route::get('/formularios/{formulario}/pdf', [MedicoController::class, 'pdf'])
-    ->name('formularios.pdf');
+        // PDF (solo completos)
+        Route::get('/formularios/{formulario}/pdf', [MedicoController::class, 'pdf'])
+            ->name('formularios.pdf');
 
-// Archivar (solo incompletos)
-Route::patch('/formularios/{formulario}/archivar', [MedicoController::class, 'archivar'])
-    ->name('formularios.archivar');
 
-Route::patch('/formularios/{formulario}/desarchivar', [MedicoController::class, 'desarchivar'])
-  ->name('formularios.desarchivar');
+        // Archivar (solo incompletos)
+        Route::patch('/formularios/{formulario}/archivar', [MedicoController::class, 'archivar'])
+            ->name('formularios.archivar');
+
+        Route::patch('/formularios/{formulario}/desarchivar', [MedicoController::class, 'desarchivar'])
+            ->name('formularios.desarchivar');
 
 
 
@@ -121,5 +122,3 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-

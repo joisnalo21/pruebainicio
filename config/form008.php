@@ -23,7 +23,7 @@ return [
         8 => 'Lesiones',
         9 => 'Obstétrica',
         10 => 'Exámenes',
-        11 => 'Dx ingreso',
+        11 => 'Dx ingreso/alta',
         12 => 'Tratamiento',
         13 => 'Alta',
     ],

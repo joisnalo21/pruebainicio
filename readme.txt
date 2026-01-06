@@ -25,7 +25,7 @@ User::create([
     'role' => 'enfermero'
 ]);
 
-
+////////////composer require setasign/fpdf:^1.8 setasign/fpdi:^2.5
 
 pipeline {
     agent any
