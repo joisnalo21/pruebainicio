@@ -159,6 +159,13 @@ class Formulario008 extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function getNumeroAttribute(): string
+    {
+        return '008-' . str_pad((string)$this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+
+
     /**
      * Helpers
      */

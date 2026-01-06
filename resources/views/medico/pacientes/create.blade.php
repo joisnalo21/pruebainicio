@@ -1,4 +1,5 @@
-    @extends('layouts.medico')
+    @extends($layout ?? 'layouts.medico')
+
 
 @section('title', 'Registrar Paciente')
 
@@ -24,7 +25,7 @@
         @endif
 
         {{-- Formulario --}}
-        <form action="{{ route('medico.pacientes.store') }}" method="POST" class="space-y-6 text-gray-800">
+        <form action="{{ route($rp.'pacientes.store') }}" method="POST" class="space-y-6 text-gray-800">
             @csrf
 
             {{-- Cédula --}}
@@ -218,7 +219,7 @@
 
             {{-- Botones --}}
             <div class="flex justify-end space-x-4 pt-8 border-t mt-8">
-                <a href="{{ route('medico.pacientes.index') }}"
+                <a href="{{ route($rp.'pacientes.index') }}"
                    class="border border-gray-400 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-100 transition">
                     Cancelar
                 </a>

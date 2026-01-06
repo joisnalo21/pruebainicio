@@ -8,6 +8,7 @@ use App\Http\Controllers\EnfermeroController;
 use App\Http\Controllers\MedicoPacienteController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\EnfermeriaFormulario008Controller;
 
 // Página principal (pública)
 Route::get('/', function () {
@@ -21,7 +22,7 @@ require __DIR__ . '/auth.php';
 // RUTAS PROTEGIDAS POR ROL
 // -------------------
 
-// ADMINISTRADOR
+//  ADMINISTRADOR
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 });
@@ -50,6 +51,9 @@ Route::middleware(['auth', 'role:medico'])
         // PACIENTES (CRUD)
         Route::get('/pacientes/validar-cedula/{cedula}', [MedicoPacienteController::class, 'validarCedula'])
             ->name('pacientes.validarCedula');
+
+        Route::resource('pacientes', MedicoPacienteController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
         Route::get('/pacientes', [MedicoPacienteController::class, 'index'])
             ->name('pacientes.index');
@@ -114,11 +118,56 @@ Route::middleware(['auth', 'role:medico'])
         Route::get('/reportes', [MedicoController::class, 'reportes'])->name('reportes');
     });
 
-// ENFERMERO
-Route::middleware(['auth', 'role:enfermero'])->group(function () {
-    Route::get('/enfermeria/dashboard', [EnfermeroController::class, 'index'])
-        ->name('enfermero.dashboard');
-});
+
+// ENFERMERÍA
+
+Route::middleware(['auth', 'role:enfermero'])
+    ->prefix('enfermeria')
+    ->name('enfermero.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', [EnfermeroController::class, 'index'])
+            ->name('dashboard');
+
+        // =========================
+        // Pacientes (CRUD)
+        // =========================
+        
+        Route::get('/pacientes/validar-cedula/{cedula}', [MedicoPacienteController::class, 'validarCedula'])
+            ->name('pacientes.validarCedula');
+
+        Route::resource('pacientes', MedicoPacienteController::class)
+            ->only(['index','create','store','edit','update','destroy']);
+
+        // =========================
+        // Formularios 008 (consulta)
+        // =========================
+        Route::get('/formularios', [EnfermeriaFormulario008Controller::class, 'index'])
+            ->name('formularios.index');
+
+        // Vista resumen (solo lectura)
+        Route::get('/formularios/{formulario}/resumen', [EnfermeriaFormulario008Controller::class, 'resumen'])
+            ->name('formularios.resumen');
+
+        //ver paso
+        Route::get('/formularios/{formulario}/ver/paso/{paso}', [EnfermeriaFormulario008Controller::class, 'verPaso'])
+            ->whereNumber('paso')
+            ->name('formularios.ver.paso');
+
+
+        // PDF (solo completos)
+        Route::get('/formularios/{formulario}/pdf', [EnfermeriaFormulario008Controller::class, 'pdf'])
+            ->name('formularios.pdf');
+
+
+        Route::get('/formularios/{formulario}/ver/paso/{paso}', [EnfermeriaFormulario008Controller::class, 'verPaso'])
+            ->whereNumber('paso')
+            ->name('formularios.ver.paso');
+    });
+
+
+
 
 // PERFIL DEL USUARIO (Laravel Breeze)
 Route::middleware('auth')->group(function () {

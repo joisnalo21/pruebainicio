@@ -1,4 +1,5 @@
-@extends('layouts.medico')
+@extends($layout ?? 'layouts.medico')
+
 
 @section('title', 'Editar Paciente')
 
@@ -23,7 +24,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('medico.pacientes.update', $paciente->id) }}" class="space-y-6 text-gray-800">
+        <form method="POST" action="{{ route($rp.'pacientes.update', $paciente->id) }}" class="space-y-6 text-gray-800">
             @csrf
             @method('PUT')
 
@@ -236,7 +237,7 @@
 
             {{-- Botones --}}
             <div class="flex justify-end space-x-4 pt-8 border-t mt-8">
-                <a href="{{ route('medico.pacientes.index') }}"
+                <a href="{{ route($rp.'pacientes.index') }}"
                    class="border border-gray-400 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-100 transition">
                     Cancelar
                 </a>

@@ -8,7 +8,7 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="bg-white shadow-xl rounded-2xl w-full max-w-md p-8 border border-gray-200">
-        <h1 class="text-2xl font-semibold text-center text-blue-700 mb-6">Sistema de Emergencias - MSP 008</h1>
+        <h1 class="text-2xl font-semibold text-center text-blue-700 mb-6">Sistema de Emergencias del Hospital de Jipijapa</h1>
 
         @if ($errors->any())
             <div class="bg-red-100 text-red-700 p-3 rounded mb-4">

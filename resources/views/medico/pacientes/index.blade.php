@@ -1,3 +1,7 @@
+@extends($layout ?? 'layouts.medico')
+
+
+
 <x-app-layout>
     <div class="p-6 max-w-7xl mx-auto">
         <!-- Encabezado -->
@@ -5,14 +9,14 @@
             <h2 class="text-2xl font-semibold text-blue-700 flex items-center gap-2">
                  Gestión de Pacientes
             </h2>
-            <a href="{{ route('medico.pacientes.create') }}"
+            <a href="{{ route($rp.'pacientes.create') }}"
                class="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
                 + Nuevo Paciente
             </a>
         </div>
 
         <!-- Búsqueda -->
-        <form method="GET" action="{{ route('medico.pacientes.index') }}"
+        <form method="GET" action="{{ route($rp.'pacientes.index') }}"
               class="flex flex-col sm:flex-row gap-3 mb-6">
             <input type="text" name="buscar" value="{{ request('buscar') }}"
                    placeholder="Buscar por nombre o cédula"
@@ -56,10 +60,10 @@
                                 <td class="px-5 py-3">{{ $paciente->provincia ?? '-' }}</td>
                                 <td class="px-5 py-3 text-center">
                                     <div class="flex justify-center gap-2">
-                                        <a href="{{ route('medico.pacientes.edit', $paciente->id) }}" 
+                                        <a href="{{ route($rp.'pacientes.edit', $paciente->id) }}"
    class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm">Editar ✏️</a>
 
-                                        <form action="{{ route('medico.pacientes.destroy', $paciente->id) }}"
+                                        <form action="{{ route($rp.'pacientes.destroy', $paciente->id) }}"
                                               method="POST"
                                               onsubmit="return confirm('¿Seguro que deseas eliminar este paciente?')"
                                               class="inline">
@@ -80,3 +84,8 @@
         @endif
     </div>
 </x-app-layout>
+@php
+  $rp = \Illuminate\Support\Str::startsWith(\Illuminate\Support\Facades\Route::currentRouteName(), 'enfermero.')
+        ? 'enfermero.'
+        : 'medico.';
+@endphp
