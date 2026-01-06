@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminUsuariosController;
+use App\Http\Controllers\AdminFormularioController;
+use App\Http\Controllers\AdminPacienteController;
+use App\Http\Controllers\AdminReporteController;
 use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\EnfermeroController;
 use App\Http\Controllers\MedicoPacienteController;
@@ -23,9 +27,62 @@ require __DIR__ . '/auth.php';
 // -------------------
 
 //  ADMINISTRADOR
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-});
+
+Route::middleware(['auth', 'role:admin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+
+        // =========================
+        // USUARIOS (CRUD)
+        // =========================
+        Route::get('/usuarios', [AdminUsuariosController::class, 'index'])->name('usuarios.index');
+        Route::get('/usuarios/crear', [AdminUsuariosController::class, 'create'])->name('usuarios.create');
+        Route::post('/usuarios', [AdminUsuariosController::class, 'store'])->name('usuarios.store');
+        Route::get('/usuarios/{user}/editar', [AdminUsuariosController::class, 'edit'])->name('usuarios.edit');
+        Route::put('/usuarios/{user}', [AdminUsuariosController::class, 'update'])->name('usuarios.update');
+        Route::delete('/usuarios/{user}', [AdminUsuariosController::class, 'destroy'])->name('usuarios.destroy');
+
+        // Opcionales (pero recomendados)
+        Route::patch('/usuarios/{user}/toggle', [AdminUsuariosController::class, 'toggleActivo'])->name('usuarios.toggle');
+        Route::post('/usuarios/{user}/reset-password', [AdminUsuariosController::class, 'resetPassword'])->name('usuarios.reset');
+
+        // =========================
+        // FORMULARIOS 008 (GLOBAL)
+        // =========================
+        Route::get('/formularios', [AdminFormularioController::class, 'index'])->name('formularios.index');
+        Route::get('/formularios/{formulario}', [AdminFormularioController::class, 'show'])->name('formularios.show');
+        Route::get('/formularios/{formulario}/pdf', [AdminFormularioController::class, 'pdf'])->name('formularios.pdf');
+
+        Route::patch('/formularios/{formulario}/archivar', [AdminFormularioController::class, 'archivar'])->name('formularios.archivar');
+        Route::patch('/formularios/{formulario}/desarchivar', [AdminFormularioController::class, 'desarchivar'])->name('formularios.desarchivar');
+        Route::delete('/formularios/{formulario}', [AdminFormularioController::class, 'destroy'])->name('formularios.destroy');
+
+        // =========================
+        // PACIENTES (CRUD + búsqueda)
+        // =========================
+        Route::get('/pacientes', [AdminPacienteController::class, 'index'])->name('pacientes.index');
+        Route::get('/pacientes/crear', [AdminPacienteController::class, 'create'])->name('pacientes.create');
+        Route::post('/pacientes', [AdminPacienteController::class, 'store'])->name('pacientes.store');
+        Route::get('/pacientes/{paciente}/editar', [AdminPacienteController::class, 'edit'])->name('pacientes.edit');
+        Route::put('/pacientes/{paciente}', [AdminPacienteController::class, 'update'])->name('pacientes.update');
+        Route::delete('/pacientes/{paciente}', [AdminPacienteController::class, 'destroy'])->name('pacientes.destroy');
+
+        // =========================
+        // REPORTES
+        // =========================
+        Route::get('/reportes', [AdminReporteController::class, 'index'])->name('reportes.index');
+        Route::post('/reportes/pdf', [AdminReporteController::class, 'exportPdf'])->name('reportes.pdf');
+    });
+
+
+
+
+
+
 
 // MÉDICO
 Route::middleware(['auth', 'role:medico'])

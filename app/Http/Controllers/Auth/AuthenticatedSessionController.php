@@ -23,33 +23,48 @@ class AuthenticatedSessionController extends Controller
      * Handle an incoming authentication request.
      */
     public function store(Request $request): RedirectResponse
-{
-    $credentials = $request->validate([
-        'username' => ['required', 'string'],
-        'password' => ['required', 'string'],
-    ]);
+    {
+        $credentials = $request->validate([
+            'username' => ['required', 'string'],
+            'password' => ['required', 'string'],
 
-    if (Auth::attempt($credentials)) {
-        $request->session()->regenerate();
+        ]);
 
-        // Redirigir según el rol
-        switch (Auth::user()->role) {
-            case 'admin':
-                return redirect()->intended('/admin/dashboard');
-            case 'medico':
-                return redirect()->intended('/medico/dashboard');
-            case 'enfermero':
-                return redirect()->intended('/enfermeria/dashboard');
-            default:
-                Auth::logout();
-                return redirect('/login')->withErrors('Rol no válido.');
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+
+            // Bloquear acceso si el usuario está desactivado
+            if (property_exists(Auth::user(), 'is_active') || isset(Auth::user()->is_active)) {
+                if (!Auth::user()->is_active) {
+                    Auth::logout();
+                    return redirect('/login')->withErrors([
+                        'username' => 'Tu usuario está desactivado. Contacta al administrador.',
+                    ]);
+                }
+            }
+            $request->session()->regenerate();
+
+
+
+
+            // Redirigir según el rol
+            switch (Auth::user()->role) {
+                case 'admin':
+                    return redirect()->intended('/admin/dashboard');
+                case 'medico':
+                    return redirect()->intended('/medico/dashboard');
+                case 'enfermero':
+                    return redirect()->intended('/enfermeria/dashboard');
+                default:
+                    Auth::logout();
+                    return redirect('/login')->withErrors('Rol no válido.');
+            }
         }
-    }
 
-    return back()->withErrors([
-        'username' => 'Las credenciales no son correctas.',
-    ]);
-}
+        return back()->withErrors([
+            'username' => 'Las credenciales no son correctas.',
+        ]);
+    }
 
 
     /**
