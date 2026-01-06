@@ -6,7 +6,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AdminUsuariosController;
 use App\Http\Controllers\AdminFormularioController;
 use App\Http\Controllers\AdminPacienteController;
-use App\Http\Controllers\AdminReporteController;
+use App\Http\Controllers\AdminReportesController;
 use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\EnfermeroController;
 use App\Http\Controllers\MedicoPacienteController;
@@ -50,32 +50,29 @@ Route::middleware(['auth', 'role:admin'])
         Route::patch('/usuarios/{user}/toggle', [AdminUsuariosController::class, 'toggleActivo'])->name('usuarios.toggle');
         Route::post('/usuarios/{user}/reset-password', [AdminUsuariosController::class, 'resetPassword'])->name('usuarios.reset');
 
-        // =========================
-        // FORMULARIOS 008 (GLOBAL)
-        // =========================
+        // ADMIN - FORMULARIOS 008
         Route::get('/formularios', [AdminFormularioController::class, 'index'])->name('formularios.index');
         Route::get('/formularios/{formulario}', [AdminFormularioController::class, 'show'])->name('formularios.show');
+        Route::get('/formularios/{formulario}/ver/paso/{paso}', [AdminFormularioController::class, 'verPaso'])
+            ->whereNumber('paso')
+            ->name('formularios.ver.paso');
+
         Route::get('/formularios/{formulario}/pdf', [AdminFormularioController::class, 'pdf'])->name('formularios.pdf');
 
         Route::patch('/formularios/{formulario}/archivar', [AdminFormularioController::class, 'archivar'])->name('formularios.archivar');
         Route::patch('/formularios/{formulario}/desarchivar', [AdminFormularioController::class, 'desarchivar'])->name('formularios.desarchivar');
+
         Route::delete('/formularios/{formulario}', [AdminFormularioController::class, 'destroy'])->name('formularios.destroy');
 
-        // =========================
-        // PACIENTES (CRUD + búsqueda)
-        // =========================
-        Route::get('/pacientes', [AdminPacienteController::class, 'index'])->name('pacientes.index');
-        Route::get('/pacientes/crear', [AdminPacienteController::class, 'create'])->name('pacientes.create');
-        Route::post('/pacientes', [AdminPacienteController::class, 'store'])->name('pacientes.store');
-        Route::get('/pacientes/{paciente}/editar', [AdminPacienteController::class, 'edit'])->name('pacientes.edit');
-        Route::put('/pacientes/{paciente}', [AdminPacienteController::class, 'update'])->name('pacientes.update');
-        Route::delete('/pacientes/{paciente}', [AdminPacienteController::class, 'destroy'])->name('pacientes.destroy');
 
-        // =========================
-        // REPORTES
-        // =========================
-        Route::get('/reportes', [AdminReporteController::class, 'index'])->name('reportes.index');
-        Route::post('/reportes/pdf', [AdminReporteController::class, 'exportPdf'])->name('reportes.pdf');
+        // ADMIN - PACIENTES (solo lectura)
+        Route::get('/pacientes', [AdminPacienteController::class, 'index'])->name('pacientes.index');
+        Route::get('/pacientes/{paciente}', [AdminPacienteController::class, 'show'])->name('pacientes.show');
+
+
+        // ADMIN - REPORTES
+        Route::get('/reportes', [AdminReportesController::class, 'index'])->name('reportes.index');
+        Route::get('/reportes/pdf', [AdminReportesController::class, 'pdf'])->name('reportes.pdf');
     });
 
 
@@ -190,12 +187,12 @@ Route::middleware(['auth', 'role:enfermero'])
         // =========================
         // Pacientes (CRUD)
         // =========================
-        
+
         Route::get('/pacientes/validar-cedula/{cedula}', [MedicoPacienteController::class, 'validarCedula'])
             ->name('pacientes.validarCedula');
 
         Route::resource('pacientes', MedicoPacienteController::class)
-            ->only(['index','create','store','edit','update','destroy']);
+            ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
 
         // =========================
         // Formularios 008 (consulta)
