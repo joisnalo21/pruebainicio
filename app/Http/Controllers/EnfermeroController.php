@@ -6,7 +6,7 @@ use App\Models\Formulario008;
 use App\Models\Paciente;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-
+//comentario de prueba
 class EnfermeroController extends Controller
 {
     public function index()
