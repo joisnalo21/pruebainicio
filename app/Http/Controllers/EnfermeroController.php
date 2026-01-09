@@ -33,7 +33,7 @@ class EnfermeroController extends Controller
             ->latest()
             ->take(8)
             ->get();
-        //comentario de prueba
+        //comentario de prueba 2
         $recentPatients = Paciente::latest()->take(6)->get();
 
         return view('enfermeria.dashboard', compact('stats', 'recentForms', 'recentPatients'));
