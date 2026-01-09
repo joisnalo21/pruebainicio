@@ -16,7 +16,7 @@ class FormulariosController extends Controller
             'trauma'     => Form008::where('tipo_emergencia', 'trauma')->count(),
             'pendientes' => Form008::where('completo', 0)->count(),
         ];
-        //comentario de prueba 3
+        //comentario de prueba 4
         // búsqueda
         $query = Form008::with(['paciente', 'medico']);
 
