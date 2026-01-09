@@ -2,82 +2,169 @@ pipeline {
     agent any
 
     environment {
-        COMPOSER_HOME = "${WORKSPACE}/.composer"
-        APP_ENV = "testing"
+        SONAR_HOST_URL = 'http://sonarqube:9000'
+        SONAR_PROJECT_KEY = 'laravel-app'
+        SONAR_PROJECT_NAME = 'LaravelApp'
     }
 
     stages {
-        stage('Preparar entorno') {
+
+        stage('Clonar repositorio') {
             steps {
-                echo 'Instalando dependencias PHP y Composer...'
-                sh 'composer install --no-interaction --prefer-dist'
-                sh 'cp -n .env.example .env || true' // no sobreescribe si ya existe
-                sh 'php artisan key:generate || true'
+                echo '🔄 Clonando el repositorio desde GitHub...'
+                sh '''
+                    set -e
+                    echo "🧹 Limpiando workspace..."
+                    find . -mindepth 1 -delete || true
+                    git clone https://github.com/joisnalo21/pruebainicio.git .
+                '''
             }
         }
 
-        stage('Verificar código') {
+
+
+       stage('Configurar .env') {
+  steps {
+    sh '''
+      set -e
+      if [ -f ".env.docker" ]; then
+        rm -rf .env
+        cp .env.docker .env
+        echo "✅ Usando .env.docker"
+      else
+        echo "❌ No existe .env.docker"
+        exit 1
+      fi
+
+      sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' .env
+
+      test -f .env
+      ls -la .env .env.docker
+    '''
+  }
+}
+
+
+        stage('Instalar dependencias') {
             steps {
-                echo 'Corriendo verificación de Laravel...'
-                sh 'php artisan --version'
+                echo '📦 Instalando dependencias de Laravel...'
+                sh '''
+                    set -e
+                    apt-get update
+                    apt-get install -y php php-cli php-zip unzip curl git \
+                      php-curl php-dom php-xml php-mbstring php-intl php-gd php-mysql
+
+                    # Node 20 (requerido por Vite/Laravel Vite Plugin)
+                    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+                    apt-get install -y nodejs
+                    node -v
+                    npm -v
+
+                    # Composer
+                    curl -sS https://getcomposer.org/installer | php
+                    mv composer.phar /usr/local/bin/composer
+
+                    composer install --no-interaction --prefer-dist
+
+                    # Ahora sí artisan (ya existe vendor/)
+                    php artisan key:generate || true
+                    php artisan config:clear || true
+                    php artisan cache:clear || true
+                    php artisan route:clear || true
+                    php artisan view:clear || true
+
+                    npm install
+                    npm run build
+                '''
             }
         }
 
-        stage('Ejecutar pruebas unitarias') {
+        stage('Análisis de calidad - SonarQube') {
             steps {
-                echo 'Ejecutando PHPUnit...'
-                sh 'vendor/bin/phpunit --configuration phpunit.xml'
-            }
-        }
-        //instalar bd, conexion
-// 1. clonar en gthb
-// cargar en el workspace de github
-// 2. construir entorno  desarrollo local - workspace
-// 3. integración  continua : pruebabs funcionales, unitarias, nf, validación de código
-// 4. despliegue a producción
-        // 5. jenkins, el poceso de reconstruir localmente, tambien se hhace en jenkins
-        stage('Construir assets') {
-            steps {
-                echo 'Instalando dependencias Node y construyendo assets...'
-                sh 'npm install'
-                withEnv(["NODE_OPTIONS=--openssl-legacy-provider"]) {
-                    sh 'npm run build'
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    echo '🔍 Ejecutando análisis SonarQube...'
+                    sh '''
+                        set -e
+                        sonar-scanner \
+                          -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                          -Dsonar.projectName=${SONAR_PROJECT_NAME} \
+                          -Dsonar.host.url=${SONAR_HOST_URL} \
+                          -Dsonar.token=${SONAR_TOKEN} \
+                          -Dsonar.sources=app,resources,routes,config \
+                          -Dsonar.exclusions=vendor/**,node_modules/**,public/**,storage/** \
+                          -Dsonar.sourceEncoding=UTF-8
+                    '''
                 }
             }
         }
 
-        stage('Limpiar caché') {
+        stage('Desplegar contenedores') {
             steps {
-                echo 'Limpiando caché y configuraciones...'
-                script {
-                    // Verifica si hay conexión a la DB antes de limpiar cache
-                    def dbAvailable = sh(script: "php -r \"try { new PDO('mysql:host=${env.DB_HOST};dbname=${env.DB_DATABASE}', '${env.DB_USERNAME}', '${env.DB_PASSWORD}'); echo 'ok'; } catch (Exception \$e) { echo 'fail'; }\"", returnStdout: true).trim()
-                    if (dbAvailable == 'ok') {
-                        sh 'php artisan cache:clear'
-                        sh 'php artisan config:clear'
-                        sh 'php artisan route:clear'
-                        sh 'php artisan view:clear'
-                    } else {
-                        echo '⚠️ Base de datos no disponible, se omite limpieza de cache'
-                    }
-                }
+                echo '🚀 Desplegando Laravel y MySQL...'
+                sh '''
+                    set -e
+                    docker network create devops-net || true
+
+                    # --- MYSQL CONTAINER ---
+                    if [ -z "$(docker ps -q -f name=mysql)" ]; then
+                        echo "🔹 Iniciando contenedor MySQL..."
+                        docker run -d \
+                            --name mysql \
+                            --network devops-net \
+                            -v mysql_data:/var/lib/mysql \
+                            -e MYSQL_ROOT_PASSWORD=admin \
+                            -e MYSQL_DATABASE=pruebainicio \
+                            -e MYSQL_USER=laravel_user \
+                            -e MYSQL_PASSWORD=admin \
+                            -p 3307:3306 \
+                            mysql:8.0
+                    else
+                        echo "✅ MySQL ya está corriendo."
+                    fi
+
+                    echo "⌛ Esperando MySQL..."
+                    for i in {1..30}; do
+                        if docker exec mysql mysqladmin ping -h "mysql" --silent; then
+                            echo "✅ MySQL disponible."
+                            break
+                        fi
+                        sleep 2
+                    done
+
+                    # --- LARAVEL CONTAINER ---
+                    docker stop laravel-container || true
+                    docker rm laravel-container || true
+                    # Asegurar que el .env dentro de la imagen sea el de docker
+rm -f .env .env.local .env.dusk.local || true
+cp .env.docker .env
+                    docker build -t laravel-app .
+                    docker run -d \
+  --name laravel-container \
+  --network devops-net \
+  --env-file .env \
+  -p 8000:8000 \
+  laravel-app
+                '''
             }
         }
 
-        stage('Deploy (opcional)') {
+        stage('Configurar Laravel') {
             steps {
-                echo 'Aquí podrías desplegar a staging o producción'
-                // Ejemplo: sh 'rsync -avz ./ user@servidor:/ruta/app'
+                echo '🧩 Configurando Laravel dentro del contenedor...'
+                sh '''
+                    set -e
+                    docker exec laravel-container php artisan config:clear
+                    docker exec laravel-container php artisan cache:clear
+                    docker exec laravel-container php artisan route:clear
+                    docker exec laravel-container php artisan view:clear
+                    docker exec laravel-container php artisan migrate --force
+                '''
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline completado correctamente ✅'
-        }
-        failure {
-            echo 'Pipeline falló ❌'
-        }
+        success { echo '✅ Pipeline ejecutado exitosamente.' }
+        failure { echo '❌ Error en el pipeline. Revisa los logs.' }
     }
 }
