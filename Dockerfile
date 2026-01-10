@@ -1,6 +1,8 @@
-FROM php:8.2-apache
+FROM php:8.2-apache-bookworm
+
 
 # Instalar dependencias necesarias
+# Dependencias del sistema + extensiones PHP
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
     libpng-dev libjpeg-dev libfreetype6-dev \
@@ -8,7 +10,6 @@ RUN apt-get update \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install gd pdo pdo_mysql mbstring xml \
  && rm -rf /var/lib/apt/lists/*
-
 # Habilitar mod_rewrite (Laravel lo requiere)
 RUN a2enmod rewrite
 
