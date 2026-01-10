@@ -6,6 +6,13 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql
 
+    # Instalar extensiones PHP adicionales
+RUN apt-get update && apt-get install -y \
+    libpng-dev libjpeg-dev libfreetype6-dev zip git unzip curl libxml2-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install gd pdo pdo_mysql mbstring xml
+
+
 # Habilitar mod_rewrite (Laravel lo requiere)
 RUN a2enmod rewrite
 
@@ -22,6 +29,8 @@ RUN chown -R www-data:www-data /var/www/html \
 # Copiar y dar permisos al entrypoint
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
+
+
 
 # Exponer puerto 8000
 EXPOSE 8000

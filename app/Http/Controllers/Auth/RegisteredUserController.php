@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -31,14 +32,29 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // En esta app el campo username es obligatorio (login por usuario).
+        $base = Str::slug($request->name);
+        if ($base === '') {
+            $base = 'user';
+        }
+
+        $username = $base;
+        $i = 0;
+        while (User::where('username', $username)->exists()) {
+            $i++;
+            $username = $base . $i;
+        }
+
         $user = User::create([
+            'username' => $username,
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'medico',
         ]);
 
         event(new Registered($user));
