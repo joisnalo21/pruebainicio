@@ -13,8 +13,13 @@ RUN apt-get update \
  && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql mbstring xml zip \
  && rm -rf /var/lib/apt/lists/*
 
-# Habilitar mod_rewrite (si algún día sirves por Apache)
+# Habilitar mod_rewrite
 RUN a2enmod rewrite
+
+# (Recomendado en Laravel + Apache) DocumentRoot a /public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+ && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 # Composer
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
@@ -22,14 +27,17 @@ ENV COMPOSER_ALLOW_SUPERUSER=1
 
 WORKDIR /var/www/html
 
-# Instala deps primero para aprovechar cache
+# Cache de dependencias
 COPY composer.json composer.lock ./
 
-# ✅ Para contenedor de runtime: NO necesitas dusk/selenium, así que mejor sin dev
-RUN composer install --no-interaction --prefer-dist --no-progress --no-dev --optimize-autoloader
+# ✅ CLAVE: sin scripts, porque todavía no existe artisan en la imagen
+RUN composer install --no-interaction --prefer-dist --no-progress --no-dev --optimize-autoloader --no-scripts
 
 # Copia el resto del proyecto
 COPY . .
+
+# Ahora sí, ya existe artisan
+RUN php artisan package:discover --ansi
 
 # Permisos Laravel
 RUN chown -R www-data:www-data /var/www/html \
@@ -39,5 +47,7 @@ RUN chown -R www-data:www-data /var/www/html \
 COPY ./entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-EXPOSE 8000
+# Apache normalmente expone 80 (si mapeas 8000:80 en docker-compose, ok)
+EXPOSE 80
+
 ENTRYPOINT ["/entrypoint.sh"]
