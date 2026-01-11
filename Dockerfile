@@ -36,6 +36,14 @@ RUN composer install --no-interaction --prefer-dist --no-progress --no-dev --opt
 # Copia el resto del proyecto
 COPY . .
 
+# Evitar que se copien caches generados en CI (pueden traer providers de --dev como Dusk)
+RUN rm -f bootstrap/cache/*.php || true
+
+# Ahora sí
+RUN php artisan package:discover --ansi
+
+
+
 # Ahora sí, ya existe artisan
 RUN php artisan package:discover --ansi
 
