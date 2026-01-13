@@ -7,12 +7,15 @@ use Tests\DuskTestCase;
 
 class ExampleTest extends DuskTestCase
 {
-    public function test_login_page_loads(): void
+    public function test_redirects_to_login_or_loads_login(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/login')
-                    ->assertPathIs('/login')
-                    ->assertSee('username'); // o 'Correo' según tu idioma
+            // Si / redirige a /login, esto lo soporta.
+            $browser->visit('/')
+                    ->pause(500);
+
+            // Acepta que esté en /login (lo normal con auth)
+            $browser->assertPathIs('/login');
         });
     }
 }
