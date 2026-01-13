@@ -16,12 +16,30 @@ class MedicoController extends Controller
     // DASHBOARD
     // =========================
     public function index()
-    {
-        $totalPacientes = Paciente::count();
-        $totalFormularios = Formulario008::count();
+{
+    $totalPacientes = Paciente::count();
 
-        return view('medico.dashboard', compact('totalPacientes', 'totalFormularios'));
-    }
+    // KPIs útiles (sin "pendientes")
+    $hoy = Carbon::today();
+    $inicioMes = Carbon::now()->startOfMonth();
+
+    $stats = [
+        'hoy' => Formulario008::whereDate('created_at', $hoy)->count(),
+        'mes' => Formulario008::whereDate('created_at', '>=', $inicioMes)->count(),
+    ];
+
+    // Actividad reciente del médico (últimos 5)
+    $ultimosFormularios = Formulario008::query()
+        ->with(['paciente'])
+        ->where('created_by', Auth::id())
+        ->latest()
+        ->take(5)
+        ->get();
+
+    return view('medico.dashboard', compact('totalPacientes', 'stats', 'ultimosFormularios'));
+}
+
+
 
     // =========================
     // FORMULARIOS 008 - LISTADO
