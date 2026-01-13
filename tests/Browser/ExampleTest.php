@@ -11,11 +11,8 @@ class ExampleTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             // Si / redirige a /login, esto lo soporta.
-            $browser->visit('/')
-                    ->pause(500);
+            $browser->visit('/')->pause(500)->assertPathIs('/login');
 
-            // Acepta que esté en /login (lo normal con auth)
-            $browser->assertPathIs('/login');
         });
     }
 }
