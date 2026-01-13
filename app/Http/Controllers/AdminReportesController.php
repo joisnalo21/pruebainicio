@@ -28,11 +28,35 @@ class AdminReportesController extends Controller
 
         $bytes = $pdf->render($report, $filters);
 
-        $filename = 'Reporte-' . ($filters['tipo'] ?? 'general') . '-' . now()->format('Ymd_His') . '.pdf';
+        //  $filename = 'Reporte-' . ($filters['tipo'] ?? 'general') . '-' . now()->format('Ymd_His') . '.pdf';
+        $tipoKey = $filters['tipo'] ?? 'general';
+
+        $tipoSlug = match ($tipoKey) {
+            'prod' => 'produccion',
+            'prod_prof' => 'productividad_profesional',
+            'demo' => 'demografia',
+            'dx_ingreso' => 'diagnosticos_ingreso',
+            'dx_alta' => 'diagnosticos_alta',
+            'tiempos' => 'tiempos',
+            default => 'reporte',
+        };
+
+        $desde = ($filters['desde'] ?? 'NA');
+        $hasta = ($filters['hasta'] ?? 'NA');
+
+        $filename = sprintf(
+            "REP-008_%s_%s_A_%s_%s.pdf",
+            strtoupper($tipoSlug),
+            $desde,
+            $hasta,
+            now()->format('Ymd_His')
+        );
 
         return response($bytes, 200, [
-            'Content-Type' => 'application/pdf',
+            'Content-Type'        => 'application/pdf',
             'Content-Disposition' => "inline; filename=\"{$filename}\"",
+            'Cache-Control'       => 'private, max-age=0, must-revalidate',
+            'Pragma'              => 'public',
         ]);
     }
 
@@ -66,7 +90,7 @@ class AdminReportesController extends Controller
         $hastaDate = $hasta ? Carbon::parse($hasta)->endOfDay() : Carbon::now()->endOfDay();
 
         // Normaliza group
-        if (!in_array($groupBy, ['day','week','month'], true)) $groupBy = 'day';
+        if (!in_array($groupBy, ['day', 'week', 'month'], true)) $groupBy = 'day';
 
         // Normaliza edad
         $edadMin = ($edadMin === '' ? null : (int)$edadMin);
@@ -116,7 +140,7 @@ class AdminReportesController extends Controller
                 'dx_alta' => '4) Top diagnósticos (alta)',
                 'tiempos' => '5) Tiempos de atención / cierre',
             ],
-            'users' => User::orderBy('name')->get(['id','name','role']),
+            'users' => User::orderBy('name')->get(['id', 'name', 'role']),
         ];
 
         // Query base
@@ -127,7 +151,7 @@ class AdminReportesController extends Controller
         // Estado
         if ($estado === 'activos') {
             $base->where('estado', '!=', 'archivado');
-        } elseif (in_array($estado, ['completo','borrador','archivado'], true)) {
+        } elseif (in_array($estado, ['completo', 'borrador', 'archivado'], true)) {
             $base->where('estado', $estado);
         } // 'todos' => no filtra
 
@@ -244,7 +268,7 @@ class AdminReportesController extends Controller
             ->get();
 
         $userIds = $data->pluck('created_by')->filter()->unique()->values()->all();
-        $users = User::whereIn('id', $userIds)->get(['id','name','role'])->keyBy('id');
+        $users = User::whereIn('id', $userIds)->get(['id', 'name', 'role'])->keyBy('id');
 
         $rows = $data->map(function ($r) use ($users) {
             $u = $r->created_by ? ($users[$r->created_by] ?? null) : null;
@@ -254,7 +278,7 @@ class AdminReportesController extends Controller
             $comp  = (int)$r->completos;
             $pct   = $total > 0 ? round(($comp / $total) * 100, 1) : 0.0;
 
-            return [$name, $total, $comp, (int)$r->borradores, (int)$r->archivados, $pct.'%'];
+            return [$name, $total, $comp, (int)$r->borradores, (int)$r->archivados, $pct . '%'];
         })->toArray();
 
         $totTotal = array_sum(array_column($rows, 1));
@@ -273,7 +297,7 @@ class AdminReportesController extends Controller
                 ['label' => '% Completitud', 'w' => 35],
             ],
             'rows' => $rows,
-            'totals' => ['TOTAL', $totTotal, $totComp, array_sum(array_column($rows, 3)), array_sum(array_column($rows, 4)), $pctTot.'%'],
+            'totals' => ['TOTAL', $totTotal, $totComp, array_sum(array_column($rows, 3)), array_sum(array_column($rows, 4)), $pctTot . '%'],
         ];
     }
 
@@ -329,15 +353,15 @@ class AdminReportesController extends Controller
         $rows = [];
         $rows[] = ['--- SEXO ---', '', ''];
         foreach ($sexoCounts as $k => $v) {
-            $pct = $total > 0 ? round(($v/$total)*100, 1) : 0.0;
-            $rows[] = [$k, $v, $pct.'%'];
+            $pct = $total > 0 ? round(($v / $total) * 100, 1) : 0.0;
+            $rows[] = [$k, $v, $pct . '%'];
         }
 
         $rows[] = ['--- EDAD ---', '', ''];
         $totalA = array_sum($ageBuckets);
         foreach ($ageBuckets as $k => $v) {
-            $pct = $totalA > 0 ? round(($v/$totalA)*100, 1) : 0.0;
-            $rows[] = [$k, $v, $pct.'%'];
+            $pct = $totalA > 0 ? round(($v / $totalA) * 100, 1) : 0.0;
+            $rows[] = [$k, $v, $pct . '%'];
         }
 
         return [
@@ -384,8 +408,8 @@ class AdminReportesController extends Controller
 
         $rows = [];
         foreach ($top as $dx => $n) {
-            $pct = $totalRegistros > 0 ? round(($n/$totalRegistros)*100, 1) : 0.0;
-            $rows[] = [$dx, $n, $pct.'%'];
+            $pct = $totalRegistros > 0 ? round(($n / $totalRegistros) * 100, 1) : 0.0;
+            $rows[] = [$dx, $n, $pct . '%'];
         }
 
         return [
@@ -422,20 +446,22 @@ class AdminReportesController extends Controller
         $data = $query
             ->selectRaw("created_by")
             ->selectRaw("COUNT(*) as total")
-            ->selectRaw($hasCompletedAt
-                ? "AVG(TIMESTAMPDIFF(MINUTE, created_at, completed_at)) as avg_min"
-                : "AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as avg_min"
+            ->selectRaw(
+                $hasCompletedAt
+                    ? "AVG(TIMESTAMPDIFF(MINUTE, created_at, completed_at)) as avg_min"
+                    : "AVG(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as avg_min"
             )
-            ->selectRaw($hasCompletedAt
-                ? "MAX(TIMESTAMPDIFF(MINUTE, created_at, completed_at)) as max_min"
-                : "MAX(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as max_min"
+            ->selectRaw(
+                $hasCompletedAt
+                    ? "MAX(TIMESTAMPDIFF(MINUTE, created_at, completed_at)) as max_min"
+                    : "MAX(TIMESTAMPDIFF(MINUTE, created_at, updated_at)) as max_min"
             )
             ->groupBy('created_by')
             ->orderByDesc('total')
             ->get();
 
         $userIds = $data->pluck('created_by')->filter()->unique()->values()->all();
-        $users = User::whereIn('id', $userIds)->get(['id','name','role'])->keyBy('id');
+        $users = User::whereIn('id', $userIds)->get(['id', 'name', 'role'])->keyBy('id');
 
         $rows = $data->map(function ($r) use ($users) {
             $u = $r->created_by ? ($users[$r->created_by] ?? null) : null;

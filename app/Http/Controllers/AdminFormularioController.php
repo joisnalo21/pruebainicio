@@ -39,8 +39,8 @@ class AdminFormularioController extends Controller
                             ["%{$q}%"]
                         );
                 })
-                ->orWhere('id', $q)
-                ->orWhereRaw("CONCAT('008-', LPAD(id, 6, '0')) LIKE ?", ["%{$q}%"]);
+                    ->orWhere('id', $q)
+                    ->orWhereRaw("CONCAT('008-', LPAD(id, 6, '0')) LIKE ?", ["%{$q}%"]);
             });
         }
 
@@ -110,11 +110,14 @@ class AdminFormularioController extends Controller
         $grid = $request->boolean('grid');
         $bytes = $pdfService->render($formulario, $grid);
 
-        $filename = 'Formulario008-' . str_pad((string)$formulario->id, 6, '0', STR_PAD_LEFT) . '.pdf';
+        $filename = $formulario->pdfFilename();
+
 
         return response($bytes, 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "inline; filename=\"{$filename}\"",
+            'Content-Disposition' => "inline; filename=\"{$filename}\"; filename*=UTF-8''" . rawurlencode($filename),
+            'Cache-Control' => 'private, max-age=0, must-revalidate',
+            'Pragma' => 'public',
         ]);
     }
 

@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+
 
 class Formulario008 extends Model
 {
@@ -182,6 +185,33 @@ class Formulario008 extends Model
     public function esArchivado(): bool
     {
         return $this->estado === 'archivado';
+    }
+
+
+    public function pdfFilename(): string
+    {
+        // Asegura relación
+        $this->loadMissing('paciente');
+
+        $numero = $this->numero; // ej: 008-000123
+        $cedula = $this->paciente?->cedula ?: 'SIN_CEDULA';
+
+        $nombre = $this->paciente?->nombre_completo ?: 'SIN_NOMBRE';
+        $nombreSafe = Str::slug($nombre, '_'); // sin tildes/espacios raros
+
+        // Fecha: usa fecha_admision si existe, si no created_at
+        $fechaBase = $this->fecha_admision ?: $this->created_at;
+
+        try {
+            $fecha = $fechaBase ? Carbon::parse($fechaBase)->format('Ymd') : now()->format('Ymd');
+        } catch (\Throwable $e) {
+            $fecha = now()->format('Ymd');
+        }
+
+        // Opcional: limitar largo
+        $nombreSafe = Str::limit($nombreSafe, 45, '');
+
+        return "MSP_Form008_{$numero}_{$cedula}_{$nombreSafe}_{$fecha}.pdf";
     }
 
 

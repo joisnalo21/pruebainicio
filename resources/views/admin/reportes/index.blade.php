@@ -16,9 +16,11 @@ $group = $filters['group'] ?? 'day';
         </div>
 
         <a href="{{ route('admin.reportes.pdf', request()->query()) }}"
-            class="px-4 py-2 rounded-xl bg-gray-900 text-white hover:bg-black text-sm font-semibold">
-            Exportar PDF
+            target="_blank" rel="noopener"
+            class="bg-white hover:bg-gray-50 border border-gray-200 px-3 py-2 rounded-lg text-sm font-semibold">
+            Ver PDF
         </a>
+
     </div>
 
     {{-- Filtros --}}

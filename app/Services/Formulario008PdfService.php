@@ -702,7 +702,7 @@ class Formulario008PdfService
 
             $y = $diagIngresoRowsY[$idx];
             $this->txt($pdf, 25, $y, $dx, 8, 58, 'L');
-            $this->txt($pdf, 101, $y, $cie, 8, 10, 'C');
+            $this->txt($pdf, 105, $y, $cie, 8, 10, 'C');
             $this->check($pdf, 122, $y + 2, $tipo === 'pre');
             $this->check($pdf, 130, $y + 2, $tipo === 'def');
         }
@@ -720,7 +720,7 @@ class Formulario008PdfService
 
             $y = $diagAltaRowsY[$idx];
             $this->txt($pdf, 147, $y, $dx, 8, 60, 'L');
-            $this->txt($pdf, 220, $y, $cie, 8, 10, 'C');
+            $this->txt($pdf, 224, $y, $cie, 8, 10, 'C');
             $this->check($pdf, 241, $y + 2, $tipo === 'pre');
             $this->check($pdf, 248.6, $y + 2, $tipo === 'def');
         }

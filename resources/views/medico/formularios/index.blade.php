@@ -6,7 +6,7 @@
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                     Formularios 008
                 </h2>
-                <p class="text-sm text-gray-500">Gestión clínica de fichas médicas (MSP).</p>
+                <p class="text-sm text-gray-500">Gestión clínica de fichas médicas.</p>
             </div>
 
             <div class="flex flex-wrap gap-2">

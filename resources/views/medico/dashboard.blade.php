@@ -10,7 +10,7 @@
   <!-- Header -->
   <header class="bg-blue-700 text-white py-4 shadow-md">
     <div class="container mx-auto flex justify-between items-center px-6">
-      <h1 class="text-xl font-semibold">Sistema Emergencias - MSP 008</h1>
+      <h1 class="text-xl font-semibold">Sistema Emergencias - Hospiital de Jipijapa</h1>
       <div class="flex items-center space-x-4">
         <p>Bienvenido, {{ Auth::user()->name }}</p>
         <form method="POST" action="{{ route('logout') }}">

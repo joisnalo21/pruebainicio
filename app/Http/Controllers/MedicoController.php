@@ -234,6 +234,8 @@ class MedicoController extends Controller
         // -------------------------
         if ($paso === 1) {
             $data = $request->validate([
+                'cod_uo' => ['nullable', 'string', 'max:50'],
+                'numero_historia_clinica' => ['nullable', 'string', 'max:50'],
                 'fecha_admision' => ['required', 'date'],
                 'referido_de' => ['nullable', 'string', 'max:255'],
 
@@ -1208,11 +1210,14 @@ class MedicoController extends Controller
         $grid = $request->boolean('grid'); // modo ayuda para ubicar coordenadas
         $bytes = $pdfService->render($formulario, $grid);
 
-        $filename = 'Formulario008-' . str_pad((string)$formulario->id, 6, '0', STR_PAD_LEFT) . '.pdf';
+        $filename = $formulario->pdfFilename();
+
 
         return response($bytes, 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "inline; filename=\"{$filename}\"",
+            'Content-Disposition' => "inline; filename=\"{$filename}\"; filename*=UTF-8''" . rawurlencode($filename),
+            'Cache-Control' => 'private, max-age=0, must-revalidate',
+            'Pragma' => 'public',
         ]);
     }
 
