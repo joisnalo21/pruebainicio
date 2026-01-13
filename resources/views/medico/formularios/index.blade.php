@@ -139,8 +139,11 @@
                                 <td class="px-5 py-4 text-gray-700">{{ $form->paciente?->cedula ?? '—' }}</td>
 
                                 <td class="px-5 py-4 text-gray-700">
-                                    <div class="font-semibold">{{ optional($form->created_at)->format('Y-m-d') }}</div>
-                                    <div class="text-xs text-gray-500">{{ optional($form->created_at)->format('H:i') }}</div>
+                                    @php
+                                    $dt = $form->created_at?->timezone('America/Guayaquil');
+                                    @endphp
+                                    <div class="font-semibold">{{ $dt?->format('Y-m-d') }}</div>
+                                    <div class="text-xs text-gray-500">{{ $dt?->format('H:i') }}</div>
                                 </td>
 
                                 <td class="px-5 py-4 text-gray-700">
@@ -245,4 +248,5 @@
 
         </div>
     </div>
+
 </x-app-layout>

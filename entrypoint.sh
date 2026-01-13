@@ -1,6 +1,17 @@
 #!/bin/sh
 set -e
 
+# ===== Timezone (Ecuador) =====
+export TZ="${TZ:-America/Guayaquil}"
+
+# PHP timezone (recomendado)
+mkdir -p /usr/local/etc/php/conf.d 2>/dev/null || true
+echo "date.timezone = ${TZ}" > /usr/local/etc/php/conf.d/99-timezone.ini 2>/dev/null || true
+
+echo "🕒 PHP timezone set to: ${TZ}"
+
+
+
 echo "⌛ Esperando a que MySQL acepte conexiones..."
 
 # ---- Configs seguros por defecto (por si faltan en env) ----
