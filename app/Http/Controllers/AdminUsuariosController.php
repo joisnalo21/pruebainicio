@@ -129,7 +129,8 @@ class AdminUsuariosController extends Controller
     public function resetPassword(User $user)
     {
         // Genera password temporal
-        $temp = Str::upper(Str::random(10)) . rand(10, 99);
+        $temp = Str::upper(Str::random(10)) . random_int(10, 99);
+
 
         $user->password = $temp; // hashed cast lo hashea
         $user->save();
