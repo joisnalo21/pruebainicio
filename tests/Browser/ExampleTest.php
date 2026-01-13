@@ -7,15 +7,12 @@ use Tests\DuskTestCase;
 
 class ExampleTest extends DuskTestCase
 {
-    /**
-     * A basic Dusk test example.
-     */
-    public function testBasicExample(): void
+    public function test_login_page_loads(): void
     {
         $this->browse(function (Browser $browser) {
-            $browser->visit('/')
-                    ->assertSee("Let's get started")
-                    ->assertSee("Deploy now"); // Asegura que ambos textos estén visibles
+            $browser->visit('/login')
+                    ->assertPathIs('/login')
+                    ->assertSee('username'); // o 'Correo' según tu idioma
         });
     }
 }
