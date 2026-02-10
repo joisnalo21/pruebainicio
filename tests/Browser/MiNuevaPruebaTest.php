@@ -10,10 +10,10 @@ class MiNuevaPruebaTest extends DuskTestCase
     public function testPaginaPrincipalCarga(): void
     {
         $this->browse(function (Browser $browser) {
-    $browser->visit('/')
-            ->waitFor('ul.flex li a', 10) // espera hasta 10 segundos
-            ->assertSeeIn('ul.flex li a', 'Deploy now');
-});
+            $browser->visit('/')
+                ->assertPathIs('/login')
+                ->assertSee('Iniciar sesión');
+        });
 
     }
 }

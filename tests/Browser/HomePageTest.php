@@ -14,8 +14,8 @@ class HomePageTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit('/')
-                    ->assertSee("Let's get started")
-                    ->assertSee("Deploy now"); // Asegura que ambos textos estén visibles
+                    ->assertPathIs('/login')
+                    ->assertSee('Iniciar Sesión');
         });
     }
 }
