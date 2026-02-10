@@ -44,8 +44,12 @@ class AdminFormularioController extends Controller
             });
         }
 
-        if ($desde) $query->whereDate('created_at', '>=', $desde);
-        if ($hasta) $query->whereDate('created_at', '<=', $hasta);
+        if ($desde) {
+            $query->whereDate('created_at', '>=', $desde);
+        }
+        if ($hasta) {
+            $query->whereDate('created_at', '<=', $hasta);
+        }
 
         if ($estado === 'completo') {
             $query->where('estado', 'completo');
@@ -87,12 +91,13 @@ class AdminFormularioController extends Controller
         ]);
     }
 
-    public function verPaso(Request $request, Formulario008 $formulario, $paso)
+    public function verPaso(Formulario008 $formulario, int $paso)
     {
-        $paso = (int) $paso;
 
         $steps = config('form008.wizard', []);
-        if ($paso < 1 || empty($steps) || !isset($steps[$paso])) abort(404);
+        if ($paso < 1 || empty($steps) || !isset($steps[$paso])) {
+            abort(404);
+        }
 
         $form = $formulario->load(['paciente', 'creador']);
 

@@ -24,7 +24,7 @@ class AdminReportesController extends Controller
 
     public function pdf(Request $request, ReportesPdfService $pdf)
     {
-        [$filters, $report, $ui] = $this->buildReportFromRequest($request);
+        [$filters, $report] = $this->buildReportFromRequest($request);
 
         $bytes = $pdf->render($report, $filters);
         $tipoKey = $filters['tipo'] ?? 'general';
