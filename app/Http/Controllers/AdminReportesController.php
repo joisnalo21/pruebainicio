@@ -27,8 +27,6 @@ class AdminReportesController extends Controller
         [$filters, $report, $ui] = $this->buildReportFromRequest($request);
 
         $bytes = $pdf->render($report, $filters);
-
-        //  $filename = 'Reporte-' . ($filters['tipo'] ?? 'general') . '-' . now()->format('Ymd_His') . '.pdf';
         $tipoKey = $filters['tipo'] ?? 'general';
 
         $tipoSlug = match ($tipoKey) {

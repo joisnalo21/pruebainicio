@@ -88,9 +88,13 @@ class ReportesPdfService
         $pdf->SetFont('Arial', '', 9);
 
         $usuario = '—';
-        if (!empty($filters['user_name'])) $usuario = $filters['user_name'];
-        elseif (!empty($filters['user_id'])) $usuario = 'ID ' . $filters['user_id'];
-        elseif (!empty(auth()->user()?->name)) $usuario = auth()->user()->name;
+        if (!empty($filters['user_name'])) {
+            $usuario = $filters['user_name'];
+        } elseif (!empty($filters['user_id'])) {
+            $usuario = 'ID ' . $filters['user_id'];
+        } elseif (auth()->check() && !empty(auth()->user()->name)) {
+            $usuario = auth()->user()->name;
+        }
 
         $meta = sprintf(
             "Rango: %s a %s      Estado: %s      Usuario: %s",

@@ -7,6 +7,7 @@
 @if ($errors->any())
 <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-800">
     <div class="font-semibold mb-2">Revisa estos campos:</div>
+    
     <ul class="list-disc ml-5 text-sm space-y-1">
         @foreach ($errors->all() as $error)
         <li>{{ $error }}</li>

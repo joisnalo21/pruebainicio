@@ -251,21 +251,24 @@ class MedicoController extends Controller
         // PASO 1: ADMISION
         // -------------------------
         if ($paso === 1) {
+            // Define a constant for max length 50
+            $MAX_50 = 50;
+
             $data = $request->validate([
-                'cod_uo' => ['nullable', 'string', 'max:50'],
-                'numero_historia_clinica' => ['nullable', 'string', 'max:50'],
-                'fecha_admision' => ['required', 'date'],
-                'referido_de' => ['nullable', 'string', 'max:255'],
+            'cod_uo' => ['nullable', 'string', "max:$MAX_50"],
+            'numero_historia_clinica' => ['nullable', 'string', "max:$MAX_50"],
+            'fecha_admision' => ['required', 'date'],
+            'referido_de' => ['nullable', 'string', 'max:255'],
 
-                'avisar_nombre' => ['nullable', 'string', 'max:255'],
-                'avisar_parentesco' => ['nullable', 'string', 'max:100'],
-                'avisar_direccion' => ['nullable', 'string', 'max:255'],
-                'avisar_telefono' => ['nullable', 'string', 'max:50'],
+            'avisar_nombre' => ['nullable', 'string', 'max:255'],
+            'avisar_parentesco' => ['nullable', 'string', 'max:100'],
+            'avisar_direccion' => ['nullable', 'string', 'max:255'],
+            'avisar_telefono' => ['nullable', 'string', "max:$MAX_50"],
 
-                'forma_llegada' => ['required', 'in:ambulatorio,ambulancia,otro'],
-                'fuente_informacion' => ['nullable', 'string', 'max:255'],
-                'entrega_institucion_persona' => ['nullable', 'string', 'max:255'],
-                'entrega_telefono' => ['nullable', 'string', 'max:50'],
+            'forma_llegada' => ['required', 'in:ambulatorio,ambulancia,otro'],
+            'fuente_informacion' => ['nullable', 'string', 'max:255'],
+            'entrega_institucion_persona' => ['nullable', 'string', 'max:255'],
+            'entrega_telefono' => ['nullable', 'string', "max:$MAX_50"],
             ]);
 
             $form->fill($data);
