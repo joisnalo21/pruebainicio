@@ -102,4 +102,33 @@ class ReportesPdfServiceTest extends TestCase
         $this->assertIsString($bytes);
         $this->assertSame('%PDF', substr($bytes, 0, 4));
     }
+
+    public function test_render_uses_user_name_in_meta(): void
+    {
+        $service = new ReportesPdfService();
+
+        $report = [
+            'title' => 'Reporte meta',
+            'columns' => [
+                ['label' => 'Columna 1', 'w' => 100],
+                ['label' => 'Columna 2', 'w' => 80],
+            ],
+            'rows' => [
+                ['Fila 1', 1],
+            ],
+        ];
+
+        $filters = [
+            'tipo' => 'tiempos',
+            'desde' => '2025-01-01',
+            'hasta' => '2025-01-31',
+            'estado' => 'activos',
+            'user_name' => 'Reporte Usuario',
+        ];
+
+        $bytes = $service->render($report, $filters);
+
+        $this->assertIsString($bytes);
+        $this->assertSame('%PDF', substr($bytes, 0, 4));
+    }
 }

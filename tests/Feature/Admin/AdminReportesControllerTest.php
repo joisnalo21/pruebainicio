@@ -53,6 +53,27 @@ class AdminReportesControllerTest extends TestCase
         });
     }
 
+    public function test_index_builds_top_diagnosticos_alta_report(): void
+    {
+        $admin = $this->createUser('admin');
+        $medico = $this->createUser('medico');
+
+        $paciente = $this->createPaciente(['sexo' => 'F', 'edad' => 31]);
+
+        $this->createFormulario($medico, $paciente, [
+            'estado' => 'completo',
+            'diagnosticos_alta' => ['alta uno', 'alta dos'],
+        ]);
+
+        $response = $this->actingAs($admin)->get('/admin/reportes?tipo=dx_alta');
+
+        $response->assertOk();
+        $response->assertViewHas('report', function ($report) {
+            $rows = $report['rows'] ?? [];
+            return count($rows) > 0 && $rows[0][1] >= 1;
+        });
+    }
+
     public function test_pdf_uses_service_and_returns_pdf(): void
     {
         $admin = $this->createUser('admin');

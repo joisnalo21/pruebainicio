@@ -336,13 +336,21 @@ class AdminReportesController extends Controller
             }
             $edad = (int)$edad;
 
-            if ($edad <= 5) $ageBuckets['0-5']++;
-            elseif ($edad <= 12) $ageBuckets['6-12']++;
-            elseif ($edad <= 17) $ageBuckets['13-17']++;
-            elseif ($edad <= 29) $ageBuckets['18-29']++;
-            elseif ($edad <= 44) $ageBuckets['30-44']++;
-            elseif ($edad <= 59) $ageBuckets['45-59']++;
-            else $ageBuckets['60+']++;
+            if ($edad <= 5) {
+                $ageBuckets['0-5']++;
+            } elseif ($edad <= 12) {
+                $ageBuckets['6-12']++;
+            } elseif ($edad <= 17) {
+                $ageBuckets['13-17']++;
+            } elseif ($edad <= 29) {
+                $ageBuckets['18-29']++;
+            } elseif ($edad <= 44) {
+                $ageBuckets['30-44']++;
+            } elseif ($edad <= 59) {
+                $ageBuckets['45-59']++;
+            } else {
+                $ageBuckets['60+']++;
+            }
         }
 
         // Construimos una tabla combinada (se ve pro en PDF)

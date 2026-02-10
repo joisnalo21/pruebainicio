@@ -59,6 +59,8 @@
 
             {{-- Filtros --}}
             <div class="bg-white shadow-sm rounded-xl p-5 mb-6">
+
+            
                 <form method="GET" action="{{ route('medico.formularios') }}" class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
                     <div class="md:col-span-5">
                         <label class="block text-sm text-gray-600 mb-1">Buscar</label>
