@@ -13,15 +13,13 @@ class AdminPacienteController extends Controller
 
         $pacientes = Paciente::query()
             ->when($buscar !== '', function ($q) use ($buscar) {
-                $q->where('cedula', 'like', "%{$buscar}%")
-                  ->orWhere('primer_nombre', 'like', "%{$buscar}%")
-                  ->orWhere('segundo_nombre', 'like', "%{$buscar}%")
-                  ->orWhere('apellido_paterno', 'like', "%{$buscar}%")
-                  ->orWhere('apellido_materno', 'like', "%{$buscar}%")
-                  ->orWhereRaw(
-                      "CONCAT_WS(' ', primer_nombre, segundo_nombre, apellido_paterno, apellido_materno) LIKE ?",
-                      ["%{$buscar}%"]
-                  );
+                $q->where(function ($q) use ($buscar) {
+                    $q->where('cedula', 'like', "%{$buscar}%")
+                      ->orWhere('primer_nombre', 'like', "%{$buscar}%")
+                      ->orWhere('segundo_nombre', 'like', "%{$buscar}%")
+                      ->orWhere('apellido_paterno', 'like', "%{$buscar}%")
+                      ->orWhere('apellido_materno', 'like', "%{$buscar}%");
+                });
             })
             ->latest()
             ->paginate(12)
