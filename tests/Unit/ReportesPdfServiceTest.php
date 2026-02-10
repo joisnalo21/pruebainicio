@@ -66,4 +66,40 @@ class ReportesPdfServiceTest extends TestCase
         $this->assertIsString($bytes);
         $this->assertSame('%PDF', substr($bytes, 0, 4));
     }
+
+    public function test_render_with_orientation_and_many_rows_adds_pages(): void
+    {
+        $service = new ReportesPdfService();
+
+        $columns = [
+            ['label' => 'Columna 1', 'w' => 60],
+            ['label' => 'Columna 2', 'w' => 60],
+            ['label' => 'Columna 3', 'w' => 60],
+        ];
+
+        $rows = [];
+        for ($i = 0; $i < 80; $i++) {
+            $rows[] = ['Fila ' . $i, $i, $i + 1];
+        }
+
+        $report = [
+            'title' => 'Reporte largo',
+            'orientation' => 'L',
+            'columns' => $columns,
+            'rows' => $rows,
+            'totals' => ['TOTAL', 80, 81],
+        ];
+
+        $filters = [
+            'tipo' => 'demo',
+            'desde' => '2025-01-01',
+            'hasta' => '2025-01-31',
+            'estado' => 'activos',
+        ];
+
+        $bytes = $service->render($report, $filters);
+
+        $this->assertIsString($bytes);
+        $this->assertSame('%PDF', substr($bytes, 0, 4));
+    }
 }

@@ -4,7 +4,6 @@ namespace Tests\Feature\Admin;
 
 use App\Services\ReportesPdfService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Tests\Support\CreatesTestData;
 use Tests\TestCase;
 
@@ -111,6 +110,46 @@ class AdminReportesControllerTest extends TestCase
             return in_array('Ana Medico (MEDICO)', $names, true)
                 && in_array('Luis Medico (MEDICO)', $names, true);
         });
+    }
+
+    public function test_index_applies_filters_and_normalizes_group(): void
+    {
+        $admin = $this->createUser('admin');
+        $medico = $this->createUser('medico', ['name' => 'Filtro Medico']);
+
+        $paciente = $this->createPaciente([
+            'sexo' => 'F',
+            'edad' => 22,
+            'provincia' => 'Manabi',
+            'canton' => 'Jipijapa',
+            'parroquia' => 'Centro',
+        ]);
+
+        $this->createFormulario($medico, $paciente, ['estado' => 'completo']);
+
+        $response = $this->actingAs($admin)->get('/admin/reportes?tipo=prod&estado=todos&group=invalid&role=medico&user_id=' . $medico->id . '&sexo=F&edad_min=18&edad_max=30&provincia=Mana&canton=Jipi&parroquia=Cent');
+
+        $response->assertOk();
+        $response->assertViewHas('report', function ($report) {
+            return isset($report['totals'][1]) && $report['totals'][1] === 1;
+        });
+    }
+
+    public function test_pdf_uses_default_slug_for_unknown_tipo(): void
+    {
+        $admin = $this->createUser('admin');
+
+        $this->mock(ReportesPdfService::class, function ($mock) {
+            $mock->shouldReceive('render')
+                ->once()
+                ->andReturn('PDFBYTES');
+        });
+
+        $response = $this->actingAs($admin)->get('/admin/reportes/pdf?tipo=otro&desde=2025-01-01&hasta=2025-01-02');
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringContainsString('REP-008_REPORTE_2025-01-01_A_2025-01-02_', $response->headers->get('Content-Disposition'));
     }
 
 }
