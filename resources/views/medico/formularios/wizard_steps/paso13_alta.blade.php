@@ -64,15 +64,15 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
             {{-- Referencia extra --}}
             <div id="ref_block" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Servicio de referencia</label>
-                    <input type="text" name="alta_servicio_referencia"
+                    <label for="alta_servicio_referencia" class="block text-sm font-medium text-gray-700 mb-1">Servicio de referencia</label>
+                    <input id="alta_servicio_referencia" type="text" name="alta_servicio_referencia"
                         class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                         value="{{ old('alta_servicio_referencia', $formulario->alta_servicio_referencia) }}"
                         placeholder="Ej: Ginecología, Traumatología, UCI...">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Establecimiento</label>
-                    <input type="text" name="alta_establecimiento_referencia"
+                    <label for="alta_establecimiento_referencia" class="block text-sm font-medium text-gray-700 mb-1">Establecimiento</label>
+                    <input id="alta_establecimiento_referencia" type="text" name="alta_establecimiento_referencia"
                         class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                         value="{{ old('alta_establecimiento_referencia', $formulario->alta_establecimiento_referencia) }}"
                         placeholder="Ej: Hospital X, Centro Y...">
@@ -105,9 +105,9 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
 
             <div id="cond_block" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Condición</label>
+                    <label for="alta_condicion_group" class="block text-sm font-medium text-gray-700 mb-2">Condición</label>
                     @php $cond = old('alta_condicion', $formulario->alta_condicion); @endphp
-                    <div class="grid grid-cols-2 gap-2">
+                    <div id="alta_condicion_group" class="grid grid-cols-2 gap-2">
                         @foreach(['estable'=>'En condición estable','inestable'=>'En condición inestable'] as $k=>$txt)
                         <label class="cursor-pointer rounded-xl border px-3 py-3 flex items-center gap-2
                                 {{ $cond === $k ? 'border-gray-900 bg-gray-50' : 'border-gray-200 hover:bg-gray-50' }}">
@@ -121,8 +121,8 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Días de incapacidad</label>
-                    <input type="number" name="alta_dias_incapacidad" min="0" max="365"
+                    <label for="alta_dias_incapacidad" class="block text-sm font-medium text-gray-700 mb-1">Días de incapacidad</label>
+                    <input id="alta_dias_incapacidad" type="number" name="alta_dias_incapacidad" min="0" max="365"
                         class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                         value="{{ old('alta_dias_incapacidad', $formulario->alta_dias_incapacidad) }}"
                         placeholder="0 - 365">
@@ -131,8 +131,8 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
             </div>
 
             <div id="causa_block" class="mt-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Causa</label>
-                <input type="text" name="alta_causa"
+                <label for="alta_causa" class="block text-sm font-medium text-gray-700 mb-1">Causa</label>
+                <input id="alta_causa" type="text" name="alta_causa"
                     class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                     value="{{ old('alta_causa', $formulario->alta_causa) }}"
                     placeholder="Causa (requerida si Muerto en emergencia)">
@@ -145,14 +145,14 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de control</label>
-                    <input type="date" name="alta_fecha_control"
+                    <label for="alta_fecha_control" class="block text-sm font-medium text-gray-700 mb-1">Fecha de control</label>
+                    <input id="alta_fecha_control" type="date" name="alta_fecha_control"
                         class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                         value="{{ old('alta_fecha_control', optional($formulario->alta_fecha_control)->format('Y-m-d')) }}">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Hora finalización</label>
+                    <label for="alta_hora_finalizacion" class="block text-sm font-medium text-gray-700 mb-1">Hora finalización</label>
                     <input id="alta_hora_finalizacion" type="time" name="alta_hora_finalizacion"
                         class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                         value="{{ old('alta_hora_finalizacion', $formulario->alta_hora_finalizacion) }}">
@@ -160,7 +160,7 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Profesional y código</label>
+                    <label for="alta_profesional_codigo" class="block text-sm font-medium text-gray-700 mb-1">Profesional y código</label>
                     <input id="alta_profesional_codigo" type="text" name="alta_profesional_codigo"
                         class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                         value="{{ old('alta_profesional_codigo', $formulario->alta_profesional_codigo) }}"
@@ -169,8 +169,8 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
                 </div>
 
                 <div class="md:col-span-1">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Número de hoja</label>
-                    <input type="number" name="alta_numero_hoja" min="1"
+                    <label for="alta_numero_hoja" class="block text-sm font-medium text-gray-700 mb-1">Número de hoja</label>
+                    <input id="alta_numero_hoja" type="number" name="alta_numero_hoja" min="1"
                         class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                         value="{{ old('alta_numero_hoja', $formulario->alta_numero_hoja) }}">
                 </div>

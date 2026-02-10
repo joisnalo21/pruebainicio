@@ -69,7 +69,11 @@ class AdminReportesController extends Controller
         $tipo = $request->query('tipo', 'prod');
 
         // B) Filtros
-        $estado     = $request->query('estado', 'activos'); // activos | completo | borrador | archivado | todos
+        $allowedEstados = ['activos', 'completo', 'borrador', 'archivado', 'todos'];
+        $estado = $request->query('estado', 'activos');
+        if (!in_array($estado, $allowedEstados, true)) {
+            $estado = 'activos';
+        }
         $groupBy    = $request->query('group', 'day');      // day | week | month
         $desde      = $request->query('desde');
         $hasta      = $request->query('hasta');
@@ -88,7 +92,9 @@ class AdminReportesController extends Controller
         $hastaDate = $hasta ? Carbon::parse($hasta)->endOfDay() : Carbon::now()->endOfDay();
 
         // Normaliza group
-        if (!in_array($groupBy, ['day', 'week', 'month'], true)) $groupBy = 'day';
+        if (!in_array($groupBy, ['day', 'week', 'month'], true)) {
+            $groupBy = 'day';
+        }
 
         // Normaliza edad
         $edadMin = ($edadMin === '' ? null : (int)$edadMin);
@@ -164,12 +170,24 @@ class AdminReportesController extends Controller
         // Filtros por paciente (solo si aplica)
         if ($sexo !== '' || $edadMin !== null || $edadMax !== null || $provincia !== '' || $canton !== '' || $parroquia !== '') {
             $base->whereHas('paciente', function ($q) use ($sexo, $edadMin, $edadMax, $provincia, $canton, $parroquia) {
-                if ($sexo !== '') $q->where('sexo', $sexo);
-                if ($edadMin !== null) $q->where('edad', '>=', $edadMin);
-                if ($edadMax !== null) $q->where('edad', '<=', $edadMax);
-                if ($provincia !== '') $q->where('provincia', 'like', "%{$provincia}%");
-                if ($canton !== '') $q->where('canton', 'like', "%{$canton}%");
-                if ($parroquia !== '') $q->where('parroquia', 'like', "%{$parroquia}%");
+                if ($sexo !== '') {
+                    $q->where('sexo', $sexo);
+                }
+                if ($edadMin !== null) {
+                    $q->where('edad', '>=', $edadMin);
+                }
+                if ($edadMax !== null) {
+                    $q->where('edad', '<=', $edadMax);
+                }
+                if ($provincia !== '') {
+                    $q->where('provincia', 'like', "%{$provincia}%");
+                }
+                if ($canton !== '') {
+                    $q->where('canton', 'like', "%{$canton}%");
+                }
+                if ($parroquia !== '') {
+                    $q->where('parroquia', 'like', "%{$parroquia}%");
+                }
             });
         }
 
@@ -178,8 +196,8 @@ class AdminReportesController extends Controller
             'prod' => $this->reportProduccion(clone $base, $filters),
             'prod_prof' => $this->reportProductividadProfesional(clone $base, $filters),
             'demo' => $this->reportDemografia(clone $base, $filters),
-            'dx_ingreso' => $this->reportTopDiagnosticosPorcentaje(clone $base, $filters, 'diagnosticos_ingreso', 'Top diagnósticos de ingreso'),
-            'dx_alta' => $this->reportTopDiagnosticosPorcentaje(clone $base, $filters, 'diagnosticos_alta', 'Top diagnósticos de alta'),
+            'dx_ingreso' => $this->reportTopDiagnosticosPorcentaje(clone $base, 'diagnosticos_ingreso', 'Top diagnósticos de ingreso'),
+            'dx_alta' => $this->reportTopDiagnosticosPorcentaje(clone $base, 'diagnosticos_alta', 'Top diagnósticos de alta'),
             'tiempos' => $this->reportTiempos(clone $base, $filters),
             default => $this->reportProduccion(clone $base, $filters),
         };
@@ -253,7 +271,7 @@ class AdminReportesController extends Controller
     /**
      * 2) Productividad por profesional (ranking)
      */
-    private function reportProductividadProfesional($query, array $filters): array
+    private function reportProductividadProfesional($query): array
     {
         $data = $query
             ->selectRaw("created_by")
@@ -302,7 +320,7 @@ class AdminReportesController extends Controller
     /**
      * 3) Demografía: sexo + rangos de edad (bucket)
      */
-    private function reportDemografia($query, array $filters): array
+    private function reportDemografia($query): array
     {
         // Para demografía tiene más sentido mirar el paciente
         $forms = $query->with('paciente')->get();
@@ -321,11 +339,15 @@ class AdminReportesController extends Controller
 
         foreach ($forms as $f) {
             $p = $f->paciente;
-            if (!$p) continue;
+            if (!$p) {
+                continue;
+            }
 
             // Sexo
             $sx = trim((string)($p->sexo ?? 'N/D'));
-            if ($sx === '') $sx = 'N/D';
+            if ($sx === '') {
+                $sx = 'N/D';
+            }
             $sexoCounts[$sx] = ($sexoCounts[$sx] ?? 0) + 1;
 
             // Edad
@@ -388,7 +410,7 @@ class AdminReportesController extends Controller
      * 4) Diagnósticos top + porcentaje
      * Campo esperado: array/json en Formulario008 (diagnosticos_ingreso / diagnosticos_alta)
      */
-    private function reportTopDiagnosticosPorcentaje($query, array $filters, string $field, string $title): array
+    private function reportTopDiagnosticosPorcentaje($query, string $field, string $title): array
     {
         $forms = $query->get([$field]);
 
@@ -397,11 +419,15 @@ class AdminReportesController extends Controller
 
         foreach ($forms as $f) {
             $arr = $f->{$field} ?? [];
-            if (!is_array($arr)) continue;
+            if (!is_array($arr)) {
+                continue;
+            }
 
             foreach ($arr as $dx) {
                 $dx = is_string($dx) ? trim($dx) : '';
-                if ($dx === '') continue;
+                if ($dx === '') {
+                    continue;
+                }
 
                 $key = mb_strtoupper($dx);
                 $counts[$key] = ($counts[$key] ?? 0) + 1;
@@ -437,7 +463,7 @@ class AdminReportesController extends Controller
      * - Si existe completed_at en formularios008, usa created_at -> completed_at (ideal).
      * - Si no, usa created_at -> updated_at como aproximación (solo para "completos").
      */
-    private function reportTiempos($query, array $filters): array
+    private function reportTiempos($query): array
     {
         $table = (new Formulario008)->getTable();
         $hasCompletedAt = Schema::hasColumn($table, 'completed_at');

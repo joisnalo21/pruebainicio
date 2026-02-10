@@ -43,8 +43,12 @@ class EnfermeriaFormulario008Controller extends Controller
             });
         }
 
-        if ($desde) $query->whereDate('created_at', '>=', $desde);
-        if ($hasta) $query->whereDate('created_at', '<=', $hasta);
+        if ($desde) {
+            $query->whereDate('created_at', '>=', $desde);
+        }
+        if ($hasta) {
+            $query->whereDate('created_at', '<=', $hasta);
+        }
 
         if ($estado === 'completo') {
             $query->where('estado', 'completo');
