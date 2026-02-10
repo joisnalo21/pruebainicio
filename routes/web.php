@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use App\Http\Controllers\EnfermeriaFormulario008Controller;
 
+if (!defined('DASHBOARD_PATH')) {
+    define('DASHBOARD_PATH', '/dashboard');
+}
+
 // Página principal (pública)
 Route::get('/', function () {
     return redirect('/login');
@@ -34,7 +38,7 @@ Route::middleware(['auth', 'role:admin'])
     ->group(function () {
 
         // Dashboard
-        Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+        Route::get(DASHBOARD_PATH, [AdminController::class, 'index'])->name('dashboard');
 
         // =========================
         // USUARIOS (CRUD)
@@ -109,7 +113,7 @@ Route::middleware(['auth', 'role:medico'])
 
 
         // DASHBOARD
-        Route::get('/dashboard', [MedicoController::class, 'index'])->name('dashboard');
+        Route::get(DASHBOARD_PATH, [MedicoController::class, 'index'])->name('dashboard');
 
         // PACIENTES (CRUD)
         Route::get('/pacientes/validar-cedula/{cedula}', [MedicoPacienteController::class, 'validarCedula'])
@@ -190,7 +194,7 @@ Route::middleware(['auth', 'role:enfermero'])
     ->group(function () {
 
         // Dashboard
-        Route::get('/dashboard', [EnfermeroController::class, 'index'])
+        Route::get(DASHBOARD_PATH, [EnfermeroController::class, 'index'])
             ->name('dashboard');
 
         // =========================
@@ -231,7 +235,7 @@ Route::middleware(['auth', 'role:enfermero'])
 
 
 // Breeze / Auth tests esperan que exista la ruta nombrada "dashboard"
-Route::middleware(['auth'])->get('/dashboard', function () {
+Route::middleware(['auth'])->get(DASHBOARD_PATH, function () {
     $role = auth()->user()->role ?? null;
 
     return match ($role) {
@@ -248,3 +252,4 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+

@@ -281,4 +281,6 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
         toggleRef();
         toggleResultado();
     });
+
 </script>
+
