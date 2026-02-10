@@ -132,7 +132,7 @@
                                 <td class="px-5 py-4 font-semibold text-gray-800">{{ $form->numero }}</td>
 
                                 <td class="px-5 py-4">
-                                    <div class="font-semibold text-gray-800">{{ $form->paciente?->nombre ?? '—' }}</div>
+                                    <div class="font-semibold text-gray-800">{{ $form->paciente?->nombre_completo ?? '—' }}</div>
                                     <div class="text-xs text-gray-500">ID Paciente: {{ $form->paciente_id }}</div>
                                 </td>
 

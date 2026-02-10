@@ -24,10 +24,7 @@
                class="px-4 py-2 bg-green-600 text-white rounded-md border border-green-700 hover:bg-green-500 transition">
                Formularios
             </a>
-            <a href="{{ route('medico.reportes') }}"
-                class="px-4 py-2 bg-green-600 text-white rounded-md border border-green-700 hover:bg-green-500 transition">
-               Reportes
-            </a>
+            
         </div>
     </div>
 </nav>

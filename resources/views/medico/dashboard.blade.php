@@ -159,7 +159,8 @@
                 <td class="px-5 py-4 font-semibold text-gray-900">{{ $f->numero }}</td>
 
                 <td class="px-5 py-4">
-                  <div class="font-semibold text-gray-800">{{ $f->paciente?->nombre ?? '—' }}</div>
+                  <div class="font-semibold text-gray-800">{{ $f->paciente?->nombre_completo ?? '—' }}</div>
+
                   <div class="text-xs text-gray-500">{{ $f->paciente?->cedula ?? '—' }}</div>
                 </td>
 
