@@ -49,4 +49,24 @@ class Formulario008ModelTest extends TestCase
         $this->assertStringContainsString('juan_carlos_perez_lopez', $filename);
         $this->assertStringEndsWith('_20250102.pdf', $filename);
     }
+
+    public function test_pdf_filename_uses_now_when_fecha_invalida(): void
+    {
+        $medico = $this->createUser('medico');
+        $paciente = $this->createPaciente([
+            'cedula' => '0102030405',
+        ]);
+
+        \Carbon\Carbon::setTestNow(\Carbon\Carbon::parse('2025-02-03 10:00:00'));
+
+        $form = $this->createFormulario($medico, $paciente, [
+            'fecha_admision' => 'fecha-no-valida',
+        ]);
+
+        $filename = $form->pdfFilename();
+
+        $this->assertStringEndsWith('_20250203.pdf', $filename);
+
+        \Carbon\Carbon::setTestNow();
+    }
 }

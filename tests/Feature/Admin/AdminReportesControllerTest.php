@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Services\ReportesPdfService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\Support\CreatesTestData;
 use Tests\TestCase;
 
@@ -111,4 +112,5 @@ class AdminReportesControllerTest extends TestCase
                 && in_array('Luis Medico (MEDICO)', $names, true);
         });
     }
+
 }

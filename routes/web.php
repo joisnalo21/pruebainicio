@@ -87,9 +87,18 @@ Route::middleware(['auth', 'role:medico'])
     ->name('medico.')
     ->group(function () {
         Route::get('/debug/db', function () {
+            $driver = DB::connection()->getDriverName();
+            if ($driver === 'sqlite') {
+                $database = DB::connection()->getDatabaseName();
+                $server = null;
+            } else {
+                $database = DB::select('select database() as db')[0]->db ?? null;
+                $server = DB::select('select @@hostname as host, @@port as port')[0] ?? null;
+            }
+
             return response()->json([
-                'database' => DB::select('select database() as db')[0]->db ?? null,
-                'server'   => DB::select('select @@hostname as host, @@port as port')[0] ?? null,
+                'database' => $database,
+                'server'   => $server,
                 'has_no_aplica_apartado_3' => Schema::hasColumn('formularios008', 'no_aplica_apartado_3'),
                 'has_custodia_policial'    => Schema::hasColumn('formularios008', 'custodia_policial'),
             ]);

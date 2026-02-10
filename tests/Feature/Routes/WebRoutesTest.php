@@ -43,4 +43,20 @@ class WebRoutesTest extends TestCase
             ->get('/dashboard')
             ->assertRedirect('/enfermeria/dashboard');
     }
+
+    public function test_medico_debug_db_endpoint_returns_json(): void
+    {
+        $medico = $this->createUser('medico');
+
+        $response = $this->actingAs($medico)->get('/medico/debug/db');
+
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'database',
+            'server',
+            'has_no_aplica_apartado_3',
+            'has_custodia_policial',
+        ]);
+        $this->assertNotNull($response->json('database'));
+    }
 }
