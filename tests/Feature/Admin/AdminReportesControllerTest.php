@@ -73,4 +73,42 @@ class AdminReportesControllerTest extends TestCase
         $response->assertHeader('Content-Type', 'application/pdf');
         $response->assertSee('PDFBYTES');
     }
+
+    public function test_index_builds_produccion_report(): void
+    {
+        $admin = $this->createUser('admin');
+        $medico = $this->createUser('medico');
+
+        $this->createFormulario($medico, null, ['estado' => 'completo']);
+        $this->createFormulario($medico, null, ['estado' => 'borrador']);
+
+        $response = $this->actingAs($admin)->get('/admin/reportes?tipo=prod');
+
+        $response->assertOk();
+        $response->assertViewHas('report', function ($report) {
+            return isset($report['totals'][1]) && $report['totals'][1] === 2
+                && isset($report['totals'][2]) && $report['totals'][2] === 1;
+        });
+    }
+
+    public function test_index_builds_productividad_por_profesional_report(): void
+    {
+        $admin = $this->createUser('admin');
+        $medico1 = $this->createUser('medico', ['name' => 'Ana Medico']);
+        $medico2 = $this->createUser('medico', ['name' => 'Luis Medico']);
+
+        $this->createFormulario($medico1, null, ['estado' => 'completo']);
+        $this->createFormulario($medico1, null, ['estado' => 'borrador']);
+        $this->createFormulario($medico2, null, ['estado' => 'completo']);
+
+        $response = $this->actingAs($admin)->get('/admin/reportes?tipo=prod_prof');
+
+        $response->assertOk();
+        $response->assertViewHas('report', function ($report) {
+            $rows = $report['rows'] ?? [];
+            $names = array_column($rows, 0);
+            return in_array('Ana Medico (MEDICO)', $names, true)
+                && in_array('Luis Medico (MEDICO)', $names, true);
+        });
+    }
 }
