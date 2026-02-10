@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="vendor/autoload.php"
+    colors="true"
+    verbose="true"
+>
+    <testsuites>
+        <testsuite name="Browser">
+            <directory suffix="Test.php">./tests/Browser</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <env name="APP_ENV" value="dusk"/>
+        <env name="APP_URL" value="http://laravel-container"/>
+        <env name="DUSK_DRIVER_URL" value="http://selenium:4444/wd/hub"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+    </php>
+</phpunit>
