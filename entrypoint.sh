@@ -71,7 +71,8 @@ php artisan route:clear || true
 php artisan view:clear || true
 
 # ---- Migraciones (si falla, sí debe fallar porque es importante) ----
-php artisan migrate --force
+php artisan migrate --force || true
+
 
 echo "🚀 Iniciando Apache..."
 exec apache2-foreground
