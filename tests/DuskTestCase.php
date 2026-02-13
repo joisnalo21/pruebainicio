@@ -17,26 +17,25 @@ abstract class DuskTestCase extends BaseTestCase
     }
 
     protected function driver(): RemoteWebDriver
-{
-    $options = (new ChromeOptions)->addArguments([
-        '--disable-gpu',
-        '--headless=new',
-        '--window-size=1920,1080',
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-    ]);
+    {
+        $options = (new ChromeOptions)->addArguments([
+            '--disable-gpu',
+            '--headless=new',
+            '--window-size=1920,1080',
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--remote-allow-origins=*',
+        ]);
 
-    $seleniumUrl = env('DUSK_DRIVER_URL', 'http://selenium:4444/wd/hub');
+        // ✅ usa env, fallback a DNS docker
+        $seleniumUrl = env('DUSK_DRIVER_URL') ?: 'http://selenium:4444';
 
-    return RemoteWebDriver::create(
-        $seleniumUrl,
-        DesiredCapabilities::chrome()->setCapability(
-            ChromeOptions::CAPABILITY,
-            $options
-        ),
-        60000, // connection timeout
-        60000  // request timeout
-    );
-}
-
+        return RemoteWebDriver::create(
+            $seleniumUrl,
+            DesiredCapabilities::chrome()->setCapability(
+                ChromeOptions::CAPABILITY,
+                $options
+            )
+        );
+    }
 }
