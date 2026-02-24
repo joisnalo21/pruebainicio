@@ -1101,7 +1101,7 @@ class MedicoController extends Controller
             ])->with('success', 'Plan de tratamiento guardado. Continúa al paso 13.');
         }
 
-        if ($paso === 13) { // <-- ajusta si tu último paso es otro
+        if ($paso === 13) { 
 
             $data = $request->validate([
                 'alta_destino' => ['required', 'in:domicilio,consulta_externa,observacion,internacion,referencia'],
@@ -1116,12 +1116,11 @@ class MedicoController extends Controller
                 'alta_dias_incapacidad' => ['nullable', 'integer', 'min:0', 'max:365'],
 
                 'alta_fecha_control' => ['nullable', 'date'],
-                'alta_hora_finalizacion' => ['nullable'], // la volvemos requerida al finalizar
+                'alta_hora_finalizacion' => ['nullable'], 
                 'alta_profesional_codigo' => ['nullable', 'string', 'max:255'],
                 'alta_numero_hoja' => ['nullable', 'integer', 'min:1', 'max:999999'],
             ]);
 
-            // Reglas condicionales
             if (($data['alta_destino'] ?? null) === 'referencia') {
                 if (blank($data['alta_servicio_referencia'] ?? null)) {
                     return back()->withErrors(['alta_servicio_referencia' => 'Requerido si es Referencia.'])->withInput();

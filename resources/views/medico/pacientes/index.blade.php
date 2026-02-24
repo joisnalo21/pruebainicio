@@ -1,5 +1,3 @@
-@extends($layout ?? 'layouts.medico')
-
 
 
 <x-app-layout>

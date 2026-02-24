@@ -156,8 +156,9 @@ class ReportesPdfService
             $pdf->Ln();
         }
 
-        // Footer
-        $pdf->SetY(-10);
+        // Footer (debe quedar por encima del trigger de page-break)
+        // Con margen inferior 12mm, usar -18 evita que FPDF cree una página extra.
+        $pdf->SetY(-18);
         $pdf->SetFont('Arial', 'I', 8);
         $pdf->Cell(0, 6, $this->enc('Emergencia008 · Reporte generado automáticamente · Página ' . $pdf->PageNo()), 0, 0, 'C');
 

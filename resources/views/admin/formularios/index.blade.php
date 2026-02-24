@@ -75,7 +75,7 @@
                 <select name="estado" class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-0">
                     <option value="" {{ $estado === null || $estado === '' ? 'selected' : '' }}>Todos</option>
                     <option value="completo" {{ $estado === 'completo' ? 'selected' : '' }}>Completos</option>
-                    <option value="incompleto" {{ $estado === 'incompleto' ? 'selected' : '' }}>Borrador</option>
+                    <option value="borrador" {{ $estado === 'borrador' || $estado === 'incompleto' ? 'selected' : '' }}>Borrador</option>
                     <option value="archivado" {{ $estado === 'archivado' ? 'selected' : '' }}>Archivados</option>
                 </select>
             </div>

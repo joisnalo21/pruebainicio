@@ -19,6 +19,7 @@
 @php
 $destino = old('alta_destino', $formulario->alta_destino);
 $resultado = old('alta_resultado', $formulario->alta_resultado);
+$isReadonly = request()->routeIs('*.formularios.ver.paso');
 @endphp
 
 <form id="form-alta-step13"
@@ -183,17 +184,19 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
 
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-2 justify-end pt-2">
-        <button id="btn-save" type="submit" name="accion" value="save"
-            class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 font-semibold">
-            Guardar borrador
-        </button>
+    @unless($isReadonly)
+        <div class="flex flex-col sm:flex-row gap-2 justify-end pt-2">
+            <button id="btn-save" type="submit" name="accion" value="save"
+                class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 font-semibold">
+                Guardar borrador
+            </button>
 
-        <button id="btn-finish" type="submit" name="accion" value="finish"
-            class="px-4 py-2 rounded-xl bg-green-700 hover:bg-green-800 text-white font-semibold">
-            Finalizar y marcar COMPLETO ✓
-        </button>
-    </div>
+            <button id="btn-finish" type="submit" name="accion" value="finish"
+                class="px-4 py-2 rounded-xl bg-green-700 hover:bg-green-800 text-white font-semibold">
+                Finalizar y marcar COMPLETO ✓
+            </button>
+        </div>
+    @endunless
 </form>
 
 <script>
@@ -242,38 +245,40 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
         // Confirmación al finalizar:
         // - Si CONFIRMA: se queda accion=finish
         // - Si CANCELA: se cambia a accion=save y se envía (guarda borrador)
-        btnFinish.addEventListener('click', (e) => {
-            e.preventDefault();
+        if (btnFinish && form) {
+            btnFinish.addEventListener('click', (e) => {
+                e.preventDefault();
 
-            const ok = window.confirm(
-                '⚠️ Al finalizar, el formulario quedará COMPLETO y NO se podrá modificar.\n\n' +
-                '¿Deseas finalizar ahora?\n\n' +
-                '• Aceptar: finalizar\n' +
-                '• Cancelar: guardar borrador'
-            );
+                const ok = window.confirm(
+                    '⚠️ Al finalizar, el formulario quedará COMPLETO y NO se podrá modificar.\n\n' +
+                    '¿Deseas finalizar ahora?\n\n' +
+                    '• Aceptar: finalizar\n' +
+                    '• Cancelar: guardar borrador'
+                );
 
-            if (ok) {
-                // Validación mínima en frontend (igual valida en backend)
-                if (!horaFin?.value || !profCod?.value?.trim()) {
-                    alert('Para finalizar debes completar: Hora finalización y Profesional y código.');
-                    return;
+                if (ok) {
+                    // Validación mínima en frontend (igual valida en backend)
+                    if (!horaFin?.value || !profCod?.value?.trim()) {
+                        alert('Para finalizar debes completar: Hora finalización y Profesional y código.');
+                        return;
+                    }
+
+                    // Enviar como finish
+                    const accion = form.querySelector('button[name="accion"]');
+                    // (no hace falta cambiar nada porque el botón ya es finish)
+                    form.submit();
+                } else {
+                    // Cambiar a borrador y enviar
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = 'accion';
+                    hidden.value = 'save';
+                    form.appendChild(hidden);
+
+                    form.submit();
                 }
-
-                // Enviar como finish
-                const accion = form.querySelector('button[name="accion"]');
-                // (no hace falta cambiar nada porque el botón ya es finish)
-                form.submit();
-            } else {
-                // Cambiar a borrador y enviar
-                const hidden = document.createElement('input');
-                hidden.type = 'hidden';
-                hidden.name = 'accion';
-                hidden.value = 'save';
-                form.appendChild(hidden);
-
-                form.submit();
-            }
-        });
+            });
+        }
 
         destinoRadios.forEach(r => r.addEventListener('change', toggleRef));
         resultadoRadios.forEach(r => r.addEventListener('change', toggleResultado));
@@ -283,4 +288,3 @@ $resultado = old('alta_resultado', $formulario->alta_resultado);
     });
 
 </script>
-

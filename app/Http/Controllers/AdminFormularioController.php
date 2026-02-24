@@ -12,7 +12,7 @@ class AdminFormularioController extends Controller
     public function index(Request $request)
     {
         $q = trim((string) $request->query('q', ''));
-        $estado = $request->query('estado'); // completo | incompleto | archivado | null
+        $estado = $request->query('estado'); // completo | borrador | archivado | null
         $desde = $request->query('desde');   // YYYY-MM-DD
         $hasta = $request->query('hasta');   // YYYY-MM-DD
 
@@ -51,9 +51,14 @@ class AdminFormularioController extends Controller
             $query->whereDate('created_at', '<=', $hasta);
         }
 
+        // Compatibilidad: antes se usaba "incompleto" para borrador.
+        if ($estado === 'incompleto') {
+            $estado = 'borrador';
+        }
+
         if ($estado === 'completo') {
             $query->where('estado', 'completo');
-        } elseif ($estado === 'incompleto') {
+        } elseif ($estado === 'borrador') {
             $query->where('estado', 'borrador');
         } elseif ($estado === 'archivado') {
             $query->where('estado', 'archivado');
