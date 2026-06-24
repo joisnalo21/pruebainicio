@@ -8,14 +8,23 @@ use Tests\DuskTestCase;
 class HomePageTest extends DuskTestCase
 {
     /**
-     * Test to ensure the home page loads properly.
+     * Verifica que "/" redirige a /login y que la página de login carga.
      */
     public function testHomePageLoads(): void
     {
         $this->browse(function (Browser $browser) {
+            // Sin sesión limpia, si un test previo dejó sesión activa "/"
+            // redirige al dashboard en lugar de /login y la prueba se rompe.
+            $this->limpiarSesion($browser);
+
             $browser->visit('/')
-                    ->assertPathIs('/login')
-                    ->assertSee('Iniciar Sesión');
+                ->assertPathIs('/login')
+                // El texto VISIBLE del body es "Iniciar sesión" (s minúscula).
+                // "Iniciar Sesión" (S mayúscula) solo está en el <title>, que
+                // no cuenta como texto del body para assertSee y por eso fallaba:
+                //   Did not see expected text [Iniciar Sesión] within element [body].
+                ->assertSee('Iniciar sesión')
+                ->assertSee('Usuario');
         });
     }
 }

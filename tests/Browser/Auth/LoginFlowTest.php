@@ -19,7 +19,9 @@ class LoginFlowTest extends DuskTestCase
         ]);
 
         $this->browse(function (Browser $browser) use ($admin) {
-            $browser->visit('/login')
+            $this->limpiarSesion($browser)
+                ->visit('/login')
+                ->waitFor('#username')
                 ->type('username', $admin->username)
                 ->type('password', 'password')
                 ->press('Iniciar sesión')
@@ -37,7 +39,9 @@ class LoginFlowTest extends DuskTestCase
         ]);
 
         $this->browse(function (Browser $browser) use ($medico) {
-            $browser->visit('/login')
+            $this->limpiarSesion($browser)
+                ->visit('/login')
+                ->waitFor('#username')
                 ->type('username', $medico->username)
                 ->type('password', 'password')
                 ->press('Iniciar sesión')
