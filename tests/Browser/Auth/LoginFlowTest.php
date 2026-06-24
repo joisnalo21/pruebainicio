@@ -2,28 +2,23 @@
 
 namespace Tests\Browser\Auth;
 
-use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
 class LoginFlowTest extends DuskTestCase
 {
-    use DatabaseMigrations;
+    // SIN DatabaseMigrations: corre contra la MySQL real con usuarios sembrados.
+    // Debe coincidir con la contraseña de UsuariosSeeder.
+    private const PASSWORD = 'Hospital2025*';
 
-    public function test_admin_can_login_and_see_dashboard(): void
+    public function test_admin_puede_iniciar_sesion(): void
     {
-        $admin = User::factory()->admin()->create([
-            'username' => 'adminuser',
-            'password' => 'password',
-        ]);
-
-        $this->browse(function (Browser $browser) use ($admin) {
+        $this->browse(function (Browser $browser) {
             $this->limpiarSesion($browser)
                 ->visit('/login')
                 ->waitFor('#username')
-                ->type('username', $admin->username)
-                ->type('password', 'password')
+                ->type('username', 'admin')
+                ->type('password', self::PASSWORD)
                 ->press('Iniciar sesión')
                 ->waitForLocation('/admin/dashboard')
                 ->assertPathIs('/admin/dashboard')
@@ -31,22 +26,31 @@ class LoginFlowTest extends DuskTestCase
         });
     }
 
-    public function test_medico_can_login_and_see_dashboard(): void
+    public function test_medico_puede_iniciar_sesion(): void
     {
-        $medico = User::factory()->medico()->create([
-            'username' => 'medicouser',
-            'password' => 'password',
-        ]);
-
-        $this->browse(function (Browser $browser) use ($medico) {
+        $this->browse(function (Browser $browser) {
             $this->limpiarSesion($browser)
                 ->visit('/login')
                 ->waitFor('#username')
-                ->type('username', $medico->username)
-                ->type('password', 'password')
+                ->type('username', 'drnavia')
+                ->type('password', self::PASSWORD)
                 ->press('Iniciar sesión')
                 ->waitForLocation('/medico/dashboard')
                 ->assertPathIs('/medico/dashboard');
+        });
+    }
+
+    public function test_enfermero_puede_iniciar_sesion(): void
+    {
+        $this->browse(function (Browser $browser) {
+            $this->limpiarSesion($browser)
+                ->visit('/login')
+                ->waitFor('#username')
+                ->type('username', 'enfermera1')
+                ->type('password', self::PASSWORD)
+                ->press('Iniciar sesión')
+                ->waitForLocation('/enfermeria/dashboard')
+                ->assertPathIs('/enfermeria/dashboard');
         });
     }
 }

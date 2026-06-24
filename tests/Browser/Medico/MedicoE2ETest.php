@@ -2,46 +2,54 @@
 
 namespace Tests\Browser\Medico;
 
+use App\Models\Formulario008;
+use App\Models\Paciente;
 use App\Models\User;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 use Tests\Support\CreatesTestData;
 
 class MedicoE2ETest extends DuskTestCase
 {
-    use DatabaseMigrations;
     use CreatesTestData;
 
+    // Debe coincidir con la contraseña de UsuariosSeeder.
+    private const PASSWORD = 'Hospital2025*';
+
+    private ?Paciente $pacientePrueba = null;
+
     /**
-     * Inicia sesión como un usuario médico partiendo SIEMPRE de una sesión
-     * limpia, para evitar la redirección del middleware 'guest' que dejaba
-     * el formulario sin el campo #username (error "body username").
+     * NO se usa DatabaseMigrations: estas pruebas corren contra la MySQL real
+     * (la misma BD que la app desplegada), por lo que migrate:fresh borraría
+     * los usuarios sembrados. En su lugar, limpiamos SOLO lo que creó la prueba.
      */
-    private function loginAs(Browser $browser, User $user): void
+    protected function tearDown(): void
+    {
+        if ($this->pacientePrueba) {
+            Formulario008::where('paciente_id', $this->pacientePrueba->id)->delete();
+            $this->pacientePrueba->delete();
+            $this->pacientePrueba = null;
+        }
+
+        parent::tearDown();
+    }
+
+    private function loginComoMedico(Browser $browser): void
     {
         $this->limpiarSesion($browser)
             ->visit('/login')
             ->waitFor('#username')
-            ->type('username', $user->username)
-            ->type('password', 'password')
+            ->type('username', 'drnavia')
+            ->type('password', self::PASSWORD)
             ->press('Iniciar sesión')
             ->waitForLocation('/medico/dashboard');
     }
 
     /**
-     * EXCLUIDO DEL ALCANCE E2E (decisión documentada).
-     *
-     * El formulario de registro de paciente usa selects encadenados
-     * (provincia -> cantón -> parroquia) poblados dinámicamente por
-     * JavaScript desde provincias.json y una API externa de nacionalidad.
-     * Esa carga asíncrona no es determinista bajo Selenium y producía:
-     *   TimeoutException: Waited 5 seconds for selector
-     *   [select#canton option[value="01"]].
-     *
-     * La validación de este formulario se cubre con pruebas Feature
-     * (servidor, sin navegador), que sí son deterministas. Las pruebas E2E
-     * con Dusk se reservan para flujos estables de UI.
+     * EXCLUIDO DEL ALCANCE E2E (decisión documentada): el formulario de
+     * registro de paciente usa selects encadenados poblados por JavaScript
+     * (provincias.json + API de nacionalidad), no deterministas bajo Selenium.
+     * Su validación se cubre con pruebas Feature.
      */
     public function test_medico_puede_crear_paciente(): void
     {
@@ -53,20 +61,20 @@ class MedicoE2ETest extends DuskTestCase
 
     public function test_medico_puede_iniciar_formulario_desde_seleccionar_paciente(): void
     {
-        $medico = User::factory()->medico()->create([
-            'username' => 'medico_form',
-            'password' => 'password',
-        ]);
+        // Garantiza que el médico sembrado exista (lo crea UsuariosSeeder).
+        User::where('username', 'drnavia')->firstOrFail();
 
-        $paciente = $this->createPaciente([
+        $this->pacientePrueba = $this->createPaciente([
             'cedula' => $this->generarCedulaValida('13'),
             'primer_nombre' => 'Carlos',
             'apellido_paterno' => 'Gomez',
             'telefono' => '0999999999',
         ]);
 
-        $this->browse(function (Browser $browser) use ($medico, $paciente) {
-            $this->loginAs($browser, $medico);
+        $paciente = $this->pacientePrueba;
+
+        $this->browse(function (Browser $browser) use ($paciente) {
+            $this->loginComoMedico($browser);
 
             $browser->visit('/medico/formularios/nuevo')
                 ->waitFor('input[name="q"]')
@@ -80,7 +88,7 @@ class MedicoE2ETest extends DuskTestCase
         });
     }
 
-    // ---- Helpers de cédula (se conservan para createPaciente / datos de prueba) ----
+    // ---- Helpers de cédula (para createPaciente) ----
 
     private function calcularDigitoVerificador(string $base9): int
     {
