@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
          * Aquí se registran los middlewares personalizados.
          * Laravel 12 ya no usa Kernel.php para registrarlos manualmente.
          */
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->alias([
             'role' => RoleMiddleware::class, // 👈 Registramos el middleware "role"
         ]);

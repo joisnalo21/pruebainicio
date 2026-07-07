@@ -16,6 +16,13 @@ RUN apt-get update \
 # Habilitar mod_rewrite
 RUN a2enmod rewrite
 
+
+RUN a2enmod rewrite headers \
+    && echo "ServerTokens Prod" >> /etc/apache2/conf-available/security.conf \
+    && echo "ServerSignature Off" >> /etc/apache2/conf-available/security.conf \
+    && a2enconf security \
+    && echo "expose_php = Off" > /usr/local/etc/php/conf.d/hide-php.ini
+
 # (Recomendado en Laravel + Apache) DocumentRoot a /public
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
