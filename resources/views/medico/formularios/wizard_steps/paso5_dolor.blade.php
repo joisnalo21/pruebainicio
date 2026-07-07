@@ -124,7 +124,8 @@
                                name="dolor[{{ $i }}][region]"
                                class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                                value="{{ $d['region'] ?? '' }}"
-                               placeholder="Ej: epigastrio, hemitórax izq, fosa iliaca der...">
+                               placeholder="Ej: epigastrio, hemitórax izq, fosa iliaca der..."
+                               required>
                     </div>
 
                     <div>
@@ -133,13 +134,14 @@
                                name="dolor[{{ $i }}][punto]"
                                class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
                                value="{{ $d['punto'] ?? '' }}"
-                               placeholder="Ej: a la palpación en... / zona exacta...">
+                               placeholder="Ej: a la palpación en... / zona exacta..."
+                               required>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
                     <div class="rounded-xl border border-gray-200 p-4">
-                        <div class="font-semibold text-gray-800 mb-2">Situación</div>
+                        <div class="font-semibold text-gray-800 mb-2">Situación <span class="text-red-500">*</span></div>
                         <div class="space-y-2">
                             @foreach($situacionOpts as $k => $lbl)
                                 <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -147,6 +149,7 @@
                                            name="dolor[{{ $i }}][situacion]"
                                            value="{{ $k }}"
                                            class="text-gray-900 focus:ring-gray-900"
+                                           required
                                            {{ ($d['situacion'] ?? null) === $k ? 'checked' : '' }}>
                                     {{ $lbl }}
                                 </label>
@@ -155,7 +158,7 @@
                     </div>
 
                     <div class="rounded-xl border border-gray-200 p-4">
-                        <div class="font-semibold text-gray-800 mb-2">Evolución</div>
+                        <div class="font-semibold text-gray-800 mb-2">Evolución <span class="text-red-500">*</span></div>
                         <div class="space-y-2">
                             @foreach($evolucionOpts as $k => $lbl)
                                 <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -163,6 +166,7 @@
                                            name="dolor[{{ $i }}][evolucion]"
                                            value="{{ $k }}"
                                            class="text-gray-900 focus:ring-gray-900"
+                                           required
                                            {{ ($d['evolucion'] ?? null) === $k ? 'checked' : '' }}>
                                     {{ $lbl }}
                                 </label>
@@ -171,7 +175,7 @@
                     </div>
 
                     <div class="rounded-xl border border-gray-200 p-4">
-                        <div class="font-semibold text-gray-800 mb-2">Tipo</div>
+                        <div class="font-semibold text-gray-800 mb-2">Tipo <span class="text-red-500">*</span></div>
                         <div class="space-y-2">
                             @foreach($tipoOpts as $k => $lbl)
                                 <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -179,6 +183,7 @@
                                            name="dolor[{{ $i }}][tipo]"
                                            value="{{ $k }}"
                                            class="text-gray-900 focus:ring-gray-900"
+                                           required
                                            {{ ($d['tipo'] ?? null) === $k ? 'checked' : '' }}>
                                     {{ $lbl }}
                                 </label>
@@ -189,7 +194,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                     <div class="rounded-xl border border-gray-200 p-4">
-                        <div class="font-semibold text-gray-800 mb-2">Se modifica con</div>
+                        <div class="font-semibold text-gray-800 mb-2">Se modifica con <span class="text-red-500">*</span></div>
                         <div class="grid grid-cols-2 gap-2">
                             @foreach($modificaOpts as $k => $lbl)
                                 <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -205,7 +210,7 @@
                     </div>
 
                     <div class="rounded-xl border border-gray-200 p-4">
-                        <div class="font-semibold text-gray-800 mb-2">Alivia con</div>
+                        <div class="font-semibold text-gray-800 mb-2">Alivia con <span class="text-red-500">*</span></div>
                         <div class="grid grid-cols-2 gap-2">
                             @foreach($aliviaOpts as $k => $lbl)
                                 <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -223,7 +228,7 @@
 
                 <div class="mt-4 rounded-xl border border-gray-200 p-4">
                     <div class="flex items-center justify-between mb-2">
-                        <div class="font-semibold text-gray-800">Intensidad (0–10)</div>
+                        <div class="font-semibold text-gray-800">Intensidad (0–10) <span class="text-red-500">*</span></div>
                         <div class="text-sm font-semibold">
                             <span class="int-value">{{ $int !== null ? $int : '—' }}</span>
                             <span class="text-gray-500">·</span>
@@ -235,7 +240,8 @@
                            min="0" max="10" step="1"
                            name="dolor[{{ $i }}][intensidad]"
                            class="w-full"
-                           value="{{ $int !== null ? $int : 0 }}">
+                           value="{{ $int !== null ? $int : 0 }}"
+                           required>
                     <div class="flex justify-between text-xs text-gray-500 mt-1">
                         <span>0</span><span>5</span><span>10</span>
                     </div>
@@ -253,7 +259,8 @@
 
         <div class="flex flex-col sm:flex-row gap-2 justify-end">
             <button type="submit" name="accion" value="save"
-                    class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 font-semibold">
+                    class="px-4 py-2 rounded-xl border bg-white hover:bg-gray-50 font-semibold"
+                    formnovalidate>
                 Guardar borrador
             </button>
 
@@ -280,23 +287,25 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Región anatómica <span class="text-red-500">*</span></label>
                 <input type="text" name="dolor[__I__][region]"
                        class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
-                       placeholder="Ej: epigastrio, hemitórax izq...">
+                       placeholder="Ej: epigastrio, hemitórax izq..."
+                       required>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Punto doloroso <span class="text-red-500">*</span></label>
                 <input type="text" name="dolor[__I__][punto]"
                        class="w-full rounded-xl border-gray-300 focus:border-gray-900 focus:ring-gray-900"
-                       placeholder="Ej: a la palpación en...">
+                       placeholder="Ej: a la palpación en..."
+                       required>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
             <div class="rounded-xl border border-gray-200 p-4">
-                <div class="font-semibold text-gray-800 mb-2">Situación</div>
+                <div class="font-semibold text-gray-800 mb-2">Situación <span class="text-red-500">*</span></div>
                 <div class="space-y-2">
                     @foreach($situacionOpts as $k => $lbl)
                         <label class="flex items-center gap-2 text-sm text-gray-700">
-                            <input type="radio" name="dolor[__I__][situacion]" value="{{ $k }}" class="text-gray-900 focus:ring-gray-900">
+                            <input type="radio" name="dolor[__I__][situacion]" value="{{ $k }}" class="text-gray-900 focus:ring-gray-900" required>
                             {{ $lbl }}
                         </label>
                     @endforeach
@@ -304,11 +313,11 @@
             </div>
 
             <div class="rounded-xl border border-gray-200 p-4">
-                <div class="font-semibold text-gray-800 mb-2">Evolución</div>
+                <div class="font-semibold text-gray-800 mb-2">Evolución <span class="text-red-500">*</span></div>
                 <div class="space-y-2">
                     @foreach($evolucionOpts as $k => $lbl)
                         <label class="flex items-center gap-2 text-sm text-gray-700">
-                            <input type="radio" name="dolor[__I__][evolucion]" value="{{ $k }}" class="text-gray-900 focus:ring-gray-900">
+                            <input type="radio" name="dolor[__I__][evolucion]" value="{{ $k }}" class="text-gray-900 focus:ring-gray-900" required>
                             {{ $lbl }}
                         </label>
                     @endforeach
@@ -316,11 +325,11 @@
             </div>
 
             <div class="rounded-xl border border-gray-200 p-4">
-                <div class="font-semibold text-gray-800 mb-2">Tipo</div>
+                <div class="font-semibold text-gray-800 mb-2">Tipo <span class="text-red-500">*</span></div>
                 <div class="space-y-2">
                     @foreach($tipoOpts as $k => $lbl)
                         <label class="flex items-center gap-2 text-sm text-gray-700">
-                            <input type="radio" name="dolor[__I__][tipo]" value="{{ $k }}" class="text-gray-900 focus:ring-gray-900">
+                            <input type="radio" name="dolor[__I__][tipo]" value="{{ $k }}" class="text-gray-900 focus:ring-gray-900" required>
                             {{ $lbl }}
                         </label>
                     @endforeach
@@ -330,7 +339,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
             <div class="rounded-xl border border-gray-200 p-4">
-                <div class="font-semibold text-gray-800 mb-2">Se modifica con</div>
+                <div class="font-semibold text-gray-800 mb-2">Se modifica con <span class="text-red-500">*</span></div>
                 <div class="grid grid-cols-2 gap-2">
                     @foreach($modificaOpts as $k => $lbl)
                         <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -343,7 +352,7 @@
             </div>
 
             <div class="rounded-xl border border-gray-200 p-4">
-                <div class="font-semibold text-gray-800 mb-2">Alivia con</div>
+                <div class="font-semibold text-gray-800 mb-2">Alivia con <span class="text-red-500">*</span></div>
                 <div class="grid grid-cols-2 gap-2">
                     @foreach($aliviaOpts as $k => $lbl)
                         <label class="flex items-center gap-2 text-sm text-gray-700">
@@ -358,7 +367,7 @@
 
         <div class="mt-4 rounded-xl border border-gray-200 p-4">
             <div class="flex items-center justify-between mb-2">
-                <div class="font-semibold text-gray-800">Intensidad (0–10)</div>
+                <div class="font-semibold text-gray-800">Intensidad (0–10) <span class="text-red-500">*</span></div>
                 <div class="text-sm font-semibold">
                     <span class="int-value">—</span>
                     <span class="text-gray-500">·</span>
@@ -366,7 +375,7 @@
                 </div>
             </div>
 
-            <input type="range" min="0" max="10" step="1" name="dolor[__I__][intensidad]" class="w-full" value="0">
+            <input type="range" min="0" max="10" step="1" name="dolor[__I__][intensidad]" class="w-full" value="0" required>
             <div class="flex justify-between text-xs text-gray-500 mt-1">
                 <span>0</span><span>5</span><span>10</span>
             </div>

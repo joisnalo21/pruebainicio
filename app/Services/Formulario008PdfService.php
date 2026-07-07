@@ -431,57 +431,59 @@ class Formulario008PdfService
         $this->check($pdf, 246, 294, $f->no_aplica_dolor == 1);
 
 
-        // ===== Sección Dolor (hasta 3 dolores) =====
+// ===== Sección Dolor (hasta 3 dolores) =====
         $dolores = is_string($f->dolor_items) ? json_decode($f->dolor_items, true) : (is_array($f->dolor_items) ? $f->dolor_items : []);
         if (!is_array($dolores)) $dolores = [];
 
-        // Coordenadas base para cada dolor (ajusta según tu PDF)
-        $dolorYBase = 320; // Y inicial del primer dolor
-        $dolorYStep = 6;  // Espaciado vertical entre dolores
+        // Coordenadas base
+        $dolorYBase = 320;
+        $dolorYStep = 6;
 
         foreach ($dolores as $idx => $dolor) {
-            if ($idx >= 3) break; // máximo 3 dolores
+            if ($idx >= 3) break;
 
             $y = $dolorYBase + ($idx * $dolorYStep);
 
-            // Región y Punto doloroso
+            // Región y Punto doloroso (uso ?? '' por seguridad)
             $this->txt($pdf, 18, $y, $dolor['region'] ?? '', 8, 50);
             $this->txt($pdf, 58, $y, $dolor['punto'] ?? '', 8, 50);
 
-            // Situación (localizado, difuso, irradiado, referido)
+            // Situación, Evolución y Tipo (usando ?? '')
             $situacion = strtolower($dolor['situacion'] ?? '');
             $this->check($pdf, 97,  $y + 2, $situacion === 'localizado');
             $this->check($pdf, 104, $y + 2, $situacion === 'difuso');
             $this->check($pdf, 111, $y + 2, $situacion === 'irradiado');
             $this->check($pdf, 119, $y + 2, $situacion === 'referido');
 
-            // Evolución (agudo, subagudo, crónico)
             $evolucion = strtolower($dolor['evolucion'] ?? '');
             $this->check($pdf, 126, $y + 2, $evolucion === 'agudo');
             $this->check($pdf, 133, $y + 2, $evolucion === 'subagudo');
             $this->check($pdf, 140, $y + 2, $evolucion === 'cronico');
 
-            // Tipo (episódico, continuo, cólico)
             $tipo = strtolower($dolor['tipo'] ?? '');
             $this->check($pdf, 148, $y + 2, $tipo === 'episodico');
             $this->check($pdf, 155, $y + 2, $tipo === 'continuo');
             $this->check($pdf, 162, $y + 2, $tipo === 'colico');
 
-            // Se modifica con (posición, ingesta, esfuerzo, dígito presión)
-            $modificaCon = is_array($dolor['se_modifica_con'] ?? []) ? $dolor['se_modifica_con'] : [];
+            // === CORRECCIÓN AQUÍ: Aseguramos que sea array antes de in_array ===
+            $modificaCon = $dolor['se_modifica_con'] ?? [];
+            if (!is_array($modificaCon)) $modificaCon = []; 
+            
             $this->check($pdf, 170, $y + 2, in_array('posicion', $modificaCon));
             $this->check($pdf, 176, $y + 2, in_array('ingesta', $modificaCon));
             $this->check($pdf, 183, $y + 2, in_array('esfuerzo', $modificaCon));
             $this->check($pdf, 190, $y + 2, in_array('digito_presion', $modificaCon));
 
-            // Alivia con (analgésico, antiespasmódico, opiáceo, no alivia)
-            $aliviaCon = is_array($dolor['alivia_con'] ?? []) ? $dolor['alivia_con'] : [];
+            // === CORRECCIÓN AQUÍ: Aseguramos que sea array antes de in_array ===
+            $aliviaCon = $dolor['alivia_con'] ?? [];
+            if (!is_array($aliviaCon)) $aliviaCon = [];
+
             $this->check($pdf, 198, $y + 2, in_array('analgesico', $aliviaCon));
             $this->check($pdf, 205, $y + 2, in_array('anti_espasmodico', $aliviaCon));
             $this->check($pdf, 212, $y + 2, in_array('opiaceo', $aliviaCon));
             $this->check($pdf, 219, $y + 2, in_array('no_alivia', $aliviaCon));
 
-            // Intensidad (escala numérica)
+            // Intensidad
             $intensidad = $dolor['intensidad'] ?? '';
             $this->txt($pdf, 208, $y, (string)$intensidad, 8, 40, 'C');
         }

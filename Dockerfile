@@ -13,10 +13,6 @@ RUN apt-get update \
  && docker-php-ext-install -j$(nproc) gd pdo pdo_mysql mbstring xml zip \
  && rm -rf /var/lib/apt/lists/*
 
-# Habilitar mod_rewrite
-RUN a2enmod rewrite
-
-
 RUN a2enmod rewrite headers \
     && echo "ServerTokens Prod" >> /etc/apache2/conf-available/security.conf \
     && echo "ServerSignature Off" >> /etc/apache2/conf-available/security.conf \
@@ -45,11 +41,6 @@ COPY . .
 
 # Evitar que se copien caches generados en CI (pueden traer providers de --dev como Dusk)
 RUN rm -f bootstrap/cache/*.php || true
-
-# Ahora sí
-RUN php artisan package:discover --ansi
-
-
 
 # Ahora sí, ya existe artisan
 RUN php artisan package:discover --ansi
